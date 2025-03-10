@@ -16,11 +16,35 @@ BACKUP_DIR="./backups"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_FILENAME="mongodb_backup_${TIMESTAMP}.gz"
 
+# Переменные для аргументов командной строки
+MODE=""
+COMMIT_MESSAGE=""
+
 # Создаем директорию для резервных копий, если она не существует
 if [ ! -d "$BACKUP_DIR" ]; then
   echo -e "${BLUE}Создание директории для резервных копий...${NC}"
   mkdir -p "$BACKUP_DIR"
 fi
+
+# Функция для вывода справки
+show_help() {
+  echo -e "${BLUE}Использование:${NC}"
+  echo -e "  $0 [опции]"
+  echo -e ""
+  echo -e "${BLUE}Опции:${NC}"
+  echo -e "  -m, --mode MODE       Режим работы (1-4):"
+  echo -e "                         1 = Полный цикл"
+  echo -e "                         2 = Только резервное копирование"
+  echo -e "                         3 = Только загрузка на GitHub"
+  echo -e "                         4 = Только пересборка контейнеров"
+  echo -e "  -c, --commit MESSAGE  Сообщение коммита (для режимов 1 и 3)"
+  echo -e "  -h, --help            Показать эту справку"
+  echo -e ""
+  echo -e "${BLUE}Примеры:${NC}"
+  echo -e "  $0 -m 1 -c \"Обновление приложения\""
+  echo -e "  $0 --mode 3 --commit \"Исправлены баги\""
+  echo -e "  $0 --mode 4"
+}
 
 # Функция для вывода сообщений
 log_message() {
@@ -66,17 +90,21 @@ git_commit_and_push() {
     return 0
   fi
   
-  # Запрашиваем сообщение коммита
-  echo -e "${YELLOW}Введите сообщение коммита (или нажмите Enter для сообщения по умолчанию):${NC}"
-  read commit_message
-  
-  if [[ -z "$commit_message" ]]; then
-    commit_message="Обновление приложения ${TIMESTAMP}"
+  # Используем переданное сообщение коммита или запрашиваем его
+  if [[ -z "$COMMIT_MESSAGE" ]]; then
+    echo -e "${YELLOW}Введите сообщение коммита (или нажмите Enter для сообщения по умолчанию):${NC}"
+    read user_commit_message
+    
+    if [[ -z "$user_commit_message" ]]; then
+      COMMIT_MESSAGE="Обновление приложения ${TIMESTAMP}"
+    else
+      COMMIT_MESSAGE="$user_commit_message"
+    fi
   fi
   
   # Добавляем все изменения и коммитим
   git add .
-  git commit -m "$commit_message"
+  git commit -m "$COMMIT_MESSAGE"
   
   if [ $? -ne 0 ]; then
     log_error "Ошибка при создании коммита."
@@ -123,21 +151,37 @@ rebuild_containers() {
   return 0
 }
 
-# Основная логика скрипта
-main() {
-  echo -e "${BLUE}=========================================${NC}"
-  echo -e "${BLUE}= Скрипт развертывания и резервного копирования =${NC}"
-  echo -e "${BLUE}=========================================${NC}"
-  
-  # Выбор действия
-  echo -e "${YELLOW}Выберите действие:${NC}"
-  echo "1. Полный цикл (резервное копирование + загрузка на GitHub + пересборка контейнеров)"
-  echo "2. Только резервное копирование базы данных"
-  echo "3. Только загрузка изменений на GitHub"
-  echo "4. Только пересборка контейнеров"
-  echo "q. Выход"
-  
-  read -p "Ваш выбор: " choice
+# Парсинг аргументов командной строки
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+      -m|--mode)
+        MODE="$2"
+        shift
+        shift
+        ;;
+      -c|--commit)
+        COMMIT_MESSAGE="$2"
+        shift
+        shift
+        ;;
+      -h|--help)
+        show_help
+        exit 0
+        ;;
+      *)
+        log_error "Неизвестный аргумент: $1"
+        show_help
+        exit 1
+        ;;
+    esac
+  done
+}
+
+# Выполнение действий в зависимости от выбранного режима
+execute_mode() {
+  local choice="$1"
   
   case $choice in
     1)
@@ -155,6 +199,7 @@ main() {
       echo -e "Резервное копирование: $([ $backup_result -eq 0 ] && echo "${GREEN}УСПЕШНО${NC}" || echo "${RED}ОШИБКА${NC}")"
       echo -e "Загрузка на GitHub: $([ $git_result -eq 0 ] && echo "${GREEN}УСПЕШНО${NC}" || echo "${RED}ОШИБКА${NC}")"
       echo -e "Пересборка контейнеров: $([ $containers_result -eq 0 ] && echo "${GREEN}УСПЕШНО${NC}" || echo "${RED}ОШИБКА${NC}")"
+      echo -e "${BLUE}=========================================${NC}"
       ;;
     2)
       backup_mongodb
@@ -165,18 +210,51 @@ main() {
     4)
       rebuild_containers
       ;;
-    q)
-      log_message "Выход из программы."
-      exit 0
-      ;;
     *)
       log_error "Некорректный выбор."
+      return 1
       ;;
   esac
   
+  return 0
+}
+
+# Основная логика скрипта
+main() {
+  # Парсим аргументы командной строки
+  parse_arguments "$@"
+  
+  # Если режим задан через аргумент, выполняем соответствующие действия
+  if [[ ! -z "$MODE" ]]; then
+    execute_mode "$MODE"
+    log_message "Работа скрипта завершена."
+    return 0
+  fi
+  
+  # Иначе запускаем интерактивный режим
   echo -e "${BLUE}=========================================${NC}"
+  echo -e "${BLUE}= Скрипт развертывания и резервного копирования =${NC}"
+  echo -e "${BLUE}=========================================${NC}"
+  
+  # Выбор действия
+  echo -e "${YELLOW}Выберите действие:${NC}"
+  echo "1. Полный цикл (резервное копирование + загрузка на GitHub + пересборка контейнеров)"
+  echo "2. Только резервное копирование базы данных"
+  echo "3. Только загрузка изменений на GitHub"
+  echo "4. Только пересборка контейнеров"
+  echo "q. Выход"
+  
+  read -p "Ваш выбор: " choice
+  
+  if [[ "$choice" == "q" ]]; then
+    log_message "Выход из программы."
+    exit 0
+  fi
+  
+  execute_mode "$choice"
+  
   log_message "Работа скрипта завершена."
 }
 
-# Запуск скрипта
-main 
+# Запуск скрипта с переданными аргументами
+main "$@" 
