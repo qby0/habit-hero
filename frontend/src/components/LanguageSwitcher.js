@@ -43,11 +43,19 @@ const LanguageSwitcher = () => {
         aria-controls="language-menu"
         aria-haspopup="true"
         onClick={handleClick}
-        color="inherit"
+        color="secondary"
+        variant="contained"
         endIcon={<ExpandMoreIcon />}
-        sx={{ textTransform: 'none' }}
+        sx={{ 
+          textTransform: 'none', 
+          mr: 2,
+          fontSize: '1rem',
+          padding: '8px 16px',
+          fontWeight: 'bold',
+          border: '2px solid #fff',
+        }}
       >
-        <Typography variant="body2" sx={{ mr: 1 }}>
+        <Typography variant="body1" sx={{ mr: 1, fontWeight: 'bold' }}>
           {flags[currentLang]} {t(`language.${currentLang}`)}
         </Typography>
       </Button>
