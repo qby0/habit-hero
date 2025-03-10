@@ -13,10 +13,13 @@ import {
 } from '@mui/material';
 import { LockOutlined } from '@mui/icons-material';
 import { AuthContext } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -46,13 +49,13 @@ const Login = () => {
     const newErrors = {};
     
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('errors.required');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = t('errors.invalidEmail');
     }
     
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('errors.required');
     }
     
     setErrors(newErrors);
@@ -87,6 +90,10 @@ const Login = () => {
           py: 4
         }}
       >
+        <Box sx={{ position: 'absolute', top: 20, right: 20 }}>
+          <LanguageSwitcher />
+        </Box>
+        
         <Paper
           elevation={3}
           sx={{
@@ -104,7 +111,7 @@ const Login = () => {
           </Avatar>
           
           <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-            Sign in to Habit Hero
+            {t('auth.login')}
           </Typography>
           
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
@@ -113,7 +120,7 @@ const Login = () => {
               required
               fullWidth
               id="email"
-              label="Email Address"
+              label={t('auth.email')}
               name="email"
               autoComplete="email"
               autoFocus
@@ -128,7 +135,7 @@ const Login = () => {
               required
               fullWidth
               name="password"
-              label="Password"
+              label={t('auth.password')}
               type="password"
               id="password"
               autoComplete="current-password"
@@ -145,13 +152,13 @@ const Login = () => {
               sx={{ mt: 3, mb: 2 }}
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('profile.saving') : t('auth.signIn')}
             </Button>
             
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link component={RouterLink} to="/register" variant="body2">
-                  Don't have an account? Sign up
+                  {t('auth.noAccount')} {t('auth.signUp')}
                 </Link>
               </Grid>
             </Grid>
@@ -159,7 +166,7 @@ const Login = () => {
         </Paper>
         
         <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 4 }}>
-          Build better habits with gamification
+          {t('app.subtitle')}
         </Typography>
       </Box>
     </Container>

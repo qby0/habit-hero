@@ -1,0 +1,118 @@
+{
+  "app": {
+    "title": "Habit Hero",
+    "subtitle": "Track your habits with gamification"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "username": "Username",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "logout": "Logout",
+    "loginSuccess": "Login successful!",
+    "registerSuccess": "Registration successful!"
+  },
+  "dashboard": {
+    "yourHabits": "Your Habits",
+    "active": "Active",
+    "archived": "Archived",
+    "completedToday": "Completed Today",
+    "noHabits": "You don't have any active habits yet. Add one to get started!",
+    "noArchivedHabits": "You don't have any archived habits.",
+    "noCompletedHabits": "You haven't completed any habits today.",
+    "addHabit": "Add Habit",
+    "addFirstHabit": "Add Your First Habit"
+  },
+  "habits": {
+    "title": "Habit Title",
+    "description": "Description",
+    "category": "Category",
+    "frequency": "Frequency",
+    "difficulty": "Difficulty",
+    "reward": "Reward",
+    "streak": "Streak",
+    "created": "Created",
+    "complete": "Complete",
+    "completed": "Completed",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "custom": "Custom Days",
+    "selectDays": "Select days",
+    "habitHistory": "History",
+    "noHistory": "No completion history",
+    "habitCreated": "Habit created successfully!",
+    "habitUpdated": "Habit updated successfully!",
+    "habitDeleted": "Habit deleted successfully!",
+    "habitCompleted": "Habit completed! +XP",
+    "confirmDelete": "Are you sure you want to delete this habit? This action cannot be undone.",
+    "categories": {
+      "health": "Health & Fitness",
+      "productivity": "Productivity",
+      "relationships": "Relationships",
+      "learning": "Learning",
+      "other": "Other"
+    },
+    "difficulties": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    }
+  },
+  "profile": {
+    "profile": "Profile",
+    "editProfile": "Edit Profile",
+    "updateSuccess": "Profile updated successfully",
+    "stats": "Statistics",
+    "level": "Level",
+    "currentStreak": "Current Streak",
+    "achievements": "Achievements",
+    "registrationDate": "Registration Date",
+    "saveChanges": "Save Changes",
+    "saving": "Saving..."
+  },
+  "achievements": {
+    "achievements": "Achievements",
+    "achievementsSubtitle": "Unlock achievements by completing habits and leveling up",
+    "noAchievements": "No available achievements. Start by creating habits!",
+    "unlocked": "Unlocked",
+    "rarities": {
+      "common": "Common",
+      "uncommon": "Uncommon",
+      "rare": "Rare",
+      "epic": "Epic",
+      "legendary": "Legendary"
+    },
+    "types": {
+      "streak": "Streak",
+      "completions": "Completions",
+      "level": "Level",
+      "habits": "Habits"
+    }
+  },
+  "errors": {
+    "required": "This field is required",
+    "minLength": "Must be at least {{count}} characters",
+    "invalidEmail": "Invalid email format",
+    "passwordMatch": "Passwords don't match",
+    "serverError": "Server error occurred. Please try again.",
+    "notFound": "Not found"
+  },
+  "language": {
+    "language": "Language",
+    "en": "English",
+    "uk": "Ukrainian",
+    "ru": "Russian",
+    "sk": "Slovak"
+  }
+} 

@@ -13,10 +13,13 @@ import {
 } from '@mui/material';
 import { PersonAddOutlined } from '@mui/icons-material';
 import { AuthContext } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const Register = () => {
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const [formData, setFormData] = useState({
     username: '',
@@ -48,25 +51,25 @@ const Register = () => {
     const newErrors = {};
     
     if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = t('errors.required');
     } else if (formData.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
+      newErrors.username = t('errors.minLength', { count: 3 });
     }
     
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('errors.required');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = t('errors.invalidEmail');
     }
     
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('errors.required');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = t('errors.minLength', { count: 6 });
     }
     
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = t('errors.passwordMatch');
     }
     
     setErrors(newErrors);
@@ -102,6 +105,10 @@ const Register = () => {
           py: 4
         }}
       >
+        <Box sx={{ position: 'absolute', top: 20, right: 20 }}>
+          <LanguageSwitcher />
+        </Box>
+        
         <Paper
           elevation={3}
           sx={{
@@ -119,7 +126,7 @@ const Register = () => {
           </Avatar>
           
           <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-            Create an Account
+            {t('auth.register')}
           </Typography>
           
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
@@ -128,7 +135,7 @@ const Register = () => {
               required
               fullWidth
               id="username"
-              label="Username"
+              label={t('auth.username')}
               name="username"
               autoComplete="username"
               autoFocus
@@ -143,7 +150,7 @@ const Register = () => {
               required
               fullWidth
               id="email"
-              label="Email Address"
+              label={t('auth.email')}
               name="email"
               autoComplete="email"
               value={formData.email}
@@ -157,7 +164,7 @@ const Register = () => {
               required
               fullWidth
               name="password"
-              label="Password"
+              label={t('auth.password')}
               type="password"
               id="password"
               autoComplete="new-password"
@@ -172,7 +179,7 @@ const Register = () => {
               required
               fullWidth
               name="confirmPassword"
-              label="Confirm Password"
+              label={t('auth.confirmPassword')}
               type="password"
               id="confirmPassword"
               autoComplete="new-password"
@@ -189,13 +196,13 @@ const Register = () => {
               sx={{ mt: 3, mb: 2 }}
               disabled={loading}
             >
-              {loading ? 'Creating Account...' : 'Sign Up'}
+              {loading ? t('profile.saving') : t('auth.signUp')}
             </Button>
             
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link component={RouterLink} to="/login" variant="body2">
-                  Already have an account? Sign in
+                  {t('auth.haveAccount')} {t('auth.signIn')}
                 </Link>
               </Grid>
             </Grid>
@@ -203,7 +210,7 @@ const Register = () => {
         </Paper>
         
         <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 4 }}>
-          Join the habit-building community
+          {t('app.subtitle')}
         </Typography>
       </Box>
     </Container>

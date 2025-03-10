@@ -1,0 +1,118 @@
+{
+  "app": {
+    "title": "Habit Hero",
+    "subtitle": "Sledujte svoje návyky s gamifikáciou"
+  },
+  "auth": {
+    "login": "Prihlásenie",
+    "register": "Registrácia",
+    "email": "E-mail",
+    "password": "Heslo",
+    "confirmPassword": "Potvrďte heslo",
+    "username": "Používateľské meno",
+    "forgotPassword": "Zabudli ste heslo?",
+    "noAccount": "Nemáte účet?",
+    "haveAccount": "Už máte účet?",
+    "signUp": "Zaregistrovať sa",
+    "signIn": "Prihlásiť sa",
+    "logout": "Odhlásiť sa",
+    "loginSuccess": "Úspešné prihlásenie!",
+    "registerSuccess": "Úspešná registrácia!"
+  },
+  "dashboard": {
+    "yourHabits": "Vaše návyky",
+    "active": "Aktívne",
+    "archived": "Archivované",
+    "completedToday": "Dokončené dnes",
+    "noHabits": "Zatiaľ nemáte žiadne aktívne návyky. Pridajte jeden a začnite!",
+    "noArchivedHabits": "Nemáte žiadne archivované návyky.",
+    "noCompletedHabits": "Dnes ste nedokončili žiadne návyky.",
+    "addHabit": "Pridať návyk",
+    "addFirstHabit": "Pridajte svoj prvý návyk"
+  },
+  "habits": {
+    "title": "Názov návyku",
+    "description": "Popis",
+    "category": "Kategória",
+    "frequency": "Frekvencia",
+    "difficulty": "Obtiažnosť",
+    "reward": "Odmena",
+    "streak": "Séria",
+    "created": "Vytvorené",
+    "complete": "Dokončiť",
+    "completed": "Dokončené",
+    "edit": "Upraviť",
+    "delete": "Odstrániť",
+    "save": "Uložiť zmeny",
+    "cancel": "Zrušiť",
+    "daily": "Denne",
+    "weekly": "Týždenne",
+    "custom": "Vybrané dni",
+    "selectDays": "Vyberte dni",
+    "habitHistory": "História",
+    "noHistory": "Žiadna história dokončenia",
+    "habitCreated": "Návyk bol úspešne vytvorený!",
+    "habitUpdated": "Návyk bol úspešne aktualizovaný!",
+    "habitDeleted": "Návyk bol úspešne odstránený!",
+    "habitCompleted": "Návyk dokončený! +XP",
+    "confirmDelete": "Naozaj chcete odstrániť tento návyk? Túto akciu nemožno vrátiť späť.",
+    "categories": {
+      "health": "Zdravie a fitnes",
+      "productivity": "Produktivita",
+      "relationships": "Vzťahy",
+      "learning": "Učenie",
+      "other": "Iné"
+    },
+    "difficulties": {
+      "easy": "Ľahké",
+      "medium": "Stredné",
+      "hard": "Ťažké"
+    }
+  },
+  "profile": {
+    "profile": "Profil",
+    "editProfile": "Upraviť profil",
+    "updateSuccess": "Profil bol úspešne aktualizovaný",
+    "stats": "Štatistiky",
+    "level": "Úroveň",
+    "currentStreak": "Aktuálna séria",
+    "achievements": "Úspechy",
+    "registrationDate": "Dátum registrácie",
+    "saveChanges": "Uložiť zmeny",
+    "saving": "Ukladá sa..."
+  },
+  "achievements": {
+    "achievements": "Úspechy",
+    "achievementsSubtitle": "Odomknite úspechy dokončením návykov a zvyšovaním úrovne",
+    "noAchievements": "Žiadne dostupné úspechy. Začnite vytvorením návykov!",
+    "unlocked": "Odomknuté",
+    "rarities": {
+      "common": "Bežné",
+      "uncommon": "Neobvyklé",
+      "rare": "Vzácne",
+      "epic": "Epické",
+      "legendary": "Legendárne"
+    },
+    "types": {
+      "streak": "Séria",
+      "completions": "Dokončenia",
+      "level": "Úroveň",
+      "habits": "Návyky"
+    }
+  },
+  "errors": {
+    "required": "Toto pole je povinné",
+    "minLength": "Musí mať aspoň {{count}} znakov",
+    "invalidEmail": "Neplatný formát e-mailu",
+    "passwordMatch": "Heslá sa nezhodujú",
+    "serverError": "Vyskytla sa chyba servera. Skúste to znova, prosím.",
+    "notFound": "Nenájdené"
+  },
+  "language": {
+    "language": "Jazyk",
+    "en": "Angličtina",
+    "uk": "Ukrajinčina",
+    "ru": "Ruština",
+    "sk": "Slovenčina"
+  }
+} 

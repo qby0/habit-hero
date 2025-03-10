@@ -31,11 +31,14 @@ import {
 import { AuthContext } from '../context/AuthContext';
 import AddHabitModal from './AddHabitModal';
 import UserProgress from './UserProgress';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 const Layout = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -67,16 +70,16 @@ const Layout = () => {
   const getPageTitle = () => {
     switch (location.pathname) {
       case '/':
-        return 'Dashboard';
+        return t('dashboard.yourHabits');
       case '/achievements':
-        return 'Achievements';
+        return t('achievements.achievements');
       case '/profile':
-        return 'Profile';
+        return t('profile.profile');
       default:
         if (location.pathname.startsWith('/habits/')) {
-          return 'Habit Details';
+          return t('habits.title');
         }
-        return 'Habit Hero';
+        return t('app.title');
     }
   };
   
@@ -104,7 +107,7 @@ const Layout = () => {
           <ListItemIcon>
             <DashboardIcon color={location.pathname === '/' ? 'primary' : 'inherit'} />
           </ListItemIcon>
-          <ListItemText primary="Dashboard" />
+          <ListItemText primary={t('dashboard.yourHabits')} />
         </ListItem>
         
         <ListItem button onClick={() => handleNavigate('/achievements')} selected={location.pathname === '/achievements'}>
@@ -113,14 +116,14 @@ const Layout = () => {
               <AchievementsIcon color={location.pathname === '/achievements' ? 'primary' : 'inherit'} />
             </Badge>
           </ListItemIcon>
-          <ListItemText primary="Achievements" />
+          <ListItemText primary={t('achievements.achievements')} />
         </ListItem>
         
         <ListItem button onClick={() => handleNavigate('/profile')} selected={location.pathname === '/profile'}>
           <ListItemIcon>
             <ProfileIcon color={location.pathname === '/profile' ? 'primary' : 'inherit'} />
           </ListItemIcon>
-          <ListItemText primary="Profile" />
+          <ListItemText primary={t('profile.profile')} />
         </ListItem>
       </List>
       
@@ -131,7 +134,7 @@ const Layout = () => {
           <ListItemIcon>
             <LogoutIcon />
           </ListItemIcon>
-          <ListItemText primary="Logout" />
+          <ListItemText primary={t('auth.logout')} />
         </ListItem>
       </List>
     </Box>
@@ -162,47 +165,51 @@ const Layout = () => {
               {getPageTitle()}
             </Typography>
             
-            <Button 
-              variant="contained" 
-              color="secondary" 
-              startIcon={<AddIcon />}
-              onClick={() => setAddHabitOpen(true)}
-              sx={{ mr: 2 }}
-            >
-              Add Habit
-            </Button>
-            
-            <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt={user?.username} src="/static/images/avatar/2.jpg">
-                    {user?.username?.charAt(0).toUpperCase()}
-                  </Avatar>
-                </IconButton>
-              </Tooltip>
-              <Menu
-                sx={{ mt: '45px' }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <LanguageSwitcher />
+              
+              <Button 
+                variant="contained" 
+                color="secondary" 
+                startIcon={<AddIcon />}
+                onClick={() => setAddHabitOpen(true)}
+                sx={{ mr: 2 }}
               >
-                <MenuItem onClick={() => { handleCloseUserMenu(); navigate('/profile'); }}>
-                  <Typography textAlign="center">Profile</Typography>
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>
-                  <Typography textAlign="center">Logout</Typography>
-                </MenuItem>
-              </Menu>
+                {t('dashboard.addHabit')}
+              </Button>
+              
+              <Box sx={{ flexGrow: 0 }}>
+                <Tooltip title={t('profile.profile')}>
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar alt={user?.username}>
+                      {user?.username?.charAt(0).toUpperCase()}
+                    </Avatar>
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: '45px' }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                >
+                  <MenuItem onClick={() => { handleCloseUserMenu(); navigate('/profile'); }}>
+                    <Typography textAlign="center">{t('profile.profile')}</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    <Typography textAlign="center">{t('auth.logout')}</Typography>
+                  </MenuItem>
+                </Menu>
+              </Box>
             </Box>
           </Toolbar>
         </Container>

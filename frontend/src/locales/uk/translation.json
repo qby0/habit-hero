@@ -1,0 +1,118 @@
+{
+  "app": {
+    "title": "Habit Hero",
+    "subtitle": "Відстежуйте звички з гейміфікацією"
+  },
+  "auth": {
+    "login": "Вхід",
+    "register": "Реєстрація",
+    "email": "Електронна пошта",
+    "password": "Пароль",
+    "confirmPassword": "Підтвердіть пароль",
+    "username": "Ім'я користувача",
+    "forgotPassword": "Забули пароль?",
+    "noAccount": "Немає облікового запису?",
+    "haveAccount": "Вже є обліковий запис?",
+    "signUp": "Зареєструватися",
+    "signIn": "Увійти",
+    "logout": "Вийти",
+    "loginSuccess": "Успішний вхід!",
+    "registerSuccess": "Успішна реєстрація!"
+  },
+  "dashboard": {
+    "yourHabits": "Ваші звички",
+    "active": "Активні",
+    "archived": "Архівовані",
+    "completedToday": "Виконані сьогодні",
+    "noHabits": "У вас ще немає активних звичок. Додайте одну, щоб почати!",
+    "noArchivedHabits": "У вас немає архівованих звичок.",
+    "noCompletedHabits": "Ви не виконали жодної звички сьогодні.",
+    "addHabit": "Додати звичку",
+    "addFirstHabit": "Додайте свою першу звичку"
+  },
+  "habits": {
+    "title": "Назва звички",
+    "description": "Опис",
+    "category": "Категорія",
+    "frequency": "Частота",
+    "difficulty": "Складність",
+    "reward": "Нагорода",
+    "streak": "Серія",
+    "created": "Створено",
+    "complete": "Виконати",
+    "completed": "Виконано",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "save": "Зберегти зміни",
+    "cancel": "Скасувати",
+    "daily": "Щоденно",
+    "weekly": "Щотижня",
+    "custom": "Вибрані дні",
+    "selectDays": "Виберіть дні",
+    "habitHistory": "Історія",
+    "noHistory": "Немає історії виконання",
+    "habitCreated": "Звичка успішно створена!",
+    "habitUpdated": "Звичка успішно оновлена!",
+    "habitDeleted": "Звичка успішно видалена!",
+    "habitCompleted": "Звичка виконана! +Досвід",
+    "confirmDelete": "Ви впевнені, що хочете видалити цю звичку? Цю дію неможливо скасувати.",
+    "categories": {
+      "health": "Здоров'я та фітнес",
+      "productivity": "Продуктивність",
+      "relationships": "Стосунки",
+      "learning": "Навчання",
+      "other": "Інше"
+    },
+    "difficulties": {
+      "easy": "Легка",
+      "medium": "Середня",
+      "hard": "Складна"
+    }
+  },
+  "profile": {
+    "profile": "Профіль",
+    "editProfile": "Редагувати профіль",
+    "updateSuccess": "Профіль успішно оновлено",
+    "stats": "Статистика",
+    "level": "Рівень",
+    "currentStreak": "Поточна серія",
+    "achievements": "Досягнення",
+    "registrationDate": "Дата реєстрації",
+    "saveChanges": "Зберегти зміни",
+    "saving": "Зберігаємо..."
+  },
+  "achievements": {
+    "achievements": "Досягнення",
+    "achievementsSubtitle": "Розблоковуйте досягнення, виконуючи звички та підвищуючи рівень",
+    "noAchievements": "Немає доступних досягнень. Почніть зі створення звичок!",
+    "unlocked": "Розблоковано",
+    "rarities": {
+      "common": "Звичайне",
+      "uncommon": "Незвичайне",
+      "rare": "Рідкісне",
+      "epic": "Епічне",
+      "legendary": "Легендарне"
+    },
+    "types": {
+      "streak": "Серія",
+      "completions": "Завершення",
+      "level": "Рівень",
+      "habits": "Звички"
+    }
+  },
+  "errors": {
+    "required": "Це поле обов'язкове",
+    "minLength": "Має бути не менше {{count}} символів",
+    "invalidEmail": "Невірний формат електронної пошти",
+    "passwordMatch": "Паролі не співпадають",
+    "serverError": "Виникла помилка сервера. Будь ласка, спробуйте ще раз.",
+    "notFound": "Не знайдено"
+  },
+  "language": {
+    "language": "Мова",
+    "en": "Англійська",
+    "uk": "Українська",
+    "ru": "Російська",
+    "sk": "Словацька"
+  }
+} 
