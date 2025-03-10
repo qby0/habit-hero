@@ -25,8 +25,10 @@ import {
 import { HabitContext } from '../context/HabitContext';
 import ConfirmDialog from '../components/ConfirmDialog';
 import HabitEditModal from '../components/HabitEditModal';
+import { useTranslation } from 'react-i18next';
 
 const HabitDetail = () => {
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { getHabit, completeHabit, deleteHabit } = useContext(HabitContext);
@@ -45,17 +47,17 @@ const HabitDetail = () => {
         if (data) {
           setHabit(data);
         } else {
-          setError('Привычка не найдена');
+          setError(t('errors.notFound'));
         }
       } catch (err) {
-        setError('Ошибка при загрузке привычки');
+        setError(t('errors.serverError'));
       } finally {
         setLoading(false);
       }
     };
     
     fetchHabit();
-  }, [id, getHabit]);
+  }, [id, getHabit, t]);
   
   const handleBack = () => {
     navigate('/');
@@ -105,7 +107,7 @@ const HabitDetail = () => {
   if (error || !habit) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
-        {error || 'Привычка не найдена'}
+        {error || t('errors.notFound')}
       </Alert>
     );
   }
@@ -113,7 +115,7 @@ const HabitDetail = () => {
   // Форматирование даты
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
+    return date.toLocaleDateString(i18n.language, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -149,30 +151,30 @@ const HabitDetail = () => {
             
             <Chip
               icon={<FireIcon />}
-              label={`Серия: ${habit.streak}`}
+              label={`${t('habits.streak')}: ${habit.streak}`}
               color="secondary"
             />
           </Box>
           
           <Typography variant="body1" sx={{ mb: 3 }}>
-            {habit.description || 'Нет описания'}
+            {habit.description || t('habits.noDescription')}
           </Typography>
           
           <Typography variant="subtitle2" color="text.secondary">
-            Частота:
+            {t('habits.frequency')}:
           </Typography>
           <Typography variant="body2" sx={{ mb: 2 }}>
             {habit.frequency === 'daily'
-              ? 'Ежедневно'
+              ? t('habits.daily')
               : habit.frequency === 'weekly'
-              ? 'Еженедельно'
-              : 'Выбранные дни'}
+              ? t('habits.weekly')
+              : t('habits.custom')}
           </Typography>
           
           {habit.frequency === 'custom' && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" color="text.secondary">
-                Выбранные дни:
+                {t('habits.selectDays')}:
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
                 {habit.customDays.map(day => (
@@ -187,14 +189,14 @@ const HabitDetail = () => {
           )}
           
           <Typography variant="subtitle2" color="text.secondary">
-            Награда:
+            {t('habits.reward')}:
           </Typography>
           <Typography variant="body2" sx={{ mb: 2 }}>
             {habit.experiencePoints} XP и {habit.coinsReward} монет
           </Typography>
           
           <Typography variant="subtitle2" color="text.secondary">
-            Создано:
+            {t('habits.created')}:
           </Typography>
           <Typography variant="body2">
             {formatDate(habit.createdAt)}
@@ -211,7 +213,7 @@ const HabitDetail = () => {
             onClick={handleComplete}
             disabled={habit.isCompletedToday}
           >
-            {habit.isCompletedToday ? 'Выполнено сегодня' : 'Отметить выполнение'}
+            {habit.isCompletedToday ? t('habits.completed') : t('habits.complete')}
           </Button>
           
           <Box>
@@ -226,7 +228,7 @@ const HabitDetail = () => {
       </Card>
       
       <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
-        История выполнения
+        {t('habits.habitHistory')}
       </Typography>
       
       {habit.completions && habit.completions.length > 0 ? (
@@ -242,7 +244,7 @@ const HabitDetail = () => {
                       {formatDate(completion.date)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Выполнено
+                      {t('habits.completed')}
                     </Typography>
                   </Box>
                 </Paper>
@@ -250,9 +252,9 @@ const HabitDetail = () => {
             ))}
         </Grid>
       ) : (
-        <Typography variant="body1" color="text.secondary">
-          Нет истории выполнения
-        </Typography>
+        <Alert severity="info">
+          {t('habits.noHistory')}
+        </Alert>
       )}
       
       {/* Диалог подтверждения удаления */}

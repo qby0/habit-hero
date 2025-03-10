@@ -14,8 +14,10 @@ import {
 } from '@mui/material';
 import { AuthContext } from '../context/AuthContext';
 import UserProgress from '../components/UserProgress';
+import { useTranslation } from 'react-i18next';
 
 const Profile = () => {
+  const { t } = useTranslation();
   const { user, updateProfile } = useContext(AuthContext);
   
   const [formData, setFormData] = useState({
@@ -92,139 +94,131 @@ const Profile = () => {
   return (
     <Box className="fade-in">
       <Typography variant="h4" component="h1" gutterBottom>
-        Профиль
+        {t('profile.profile')}
       </Typography>
       
       <Grid container spacing={4}>
         <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
               <Avatar
                 sx={{
                   width: 100,
                   height: 100,
-                  bgcolor: 'primary.main',
                   fontSize: '2.5rem',
-                  margin: '0 auto 16px'
+                  mb: 2,
+                  bgcolor: 'primary.main'
                 }}
               >
-                {user.username.charAt(0).toUpperCase()}
+                {user?.username?.charAt(0).toUpperCase()}
               </Avatar>
               
-              <Typography variant="h5" gutterBottom>
-                {user.username}
+              <Typography variant="h5" sx={{ mb: 1 }}>
+                {user?.username}
               </Typography>
               
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                {user.email}
+              <UserProgress user={user} large />
+            </Box>
+            
+            <Divider sx={{ my: 2 }} />
+            
+            <Typography variant="h6" gutterBottom>
+              {t('profile.stats')}
+            </Typography>
+            
+            <Box sx={{ mb: 1 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                {t('profile.level')}
               </Typography>
-              
-              <Divider sx={{ my: 2 }} />
-              
-              <UserProgress user={user} />
-              
-              <Divider sx={{ my: 2 }} />
-              
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Дата регистрации
-                </Typography>
-                <Typography variant="body1">
-                  {new Date(user.createdAt).toLocaleDateString('ru-RU')}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
+              <Typography variant="body1">
+                {user?.level || 1}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mb: 1 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                {t('profile.currentStreak')}
+              </Typography>
+              <Typography variant="body1">
+                {user?.currentStreak || 0} {t('habits.streak')}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ mb: 1 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                {t('profile.achievements')}
+              </Typography>
+              <Typography variant="body1">
+                {user?.achievements?.length || 0}
+              </Typography>
+            </Box>
+            
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">
+                {t('profile.registrationDate')}
+              </Typography>
+              <Typography variant="body1">
+                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
+              </Typography>
+            </Box>
+          </Paper>
         </Grid>
         
         <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h5" component="h2" gutterBottom>
-              Редактировать профиль
-            </Typography>
-            
-            {success && (
-              <Alert severity="success" sx={{ mb: 3 }}>
-                Профиль успешно обновлен
-              </Alert>
-            )}
-            
-            <Box component="form" onSubmit={handleSubmit}>
-              <TextField
-                fullWidth
-                label="Имя пользователя"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                error={!!errors.username}
-                helperText={errors.username}
-                margin="normal"
-              />
+          <Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                {t('profile.editProfile')}
+              </Typography>
               
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                error={!!errors.email}
-                helperText={errors.email}
-                margin="normal"
-              />
+              {success && (
+                <Alert severity="success" sx={{ mb: 3 }}>
+                  {t('profile.updateSuccess')}
+                </Alert>
+              )}
               
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                sx={{ mt: 3 }}
-                disabled={loading}
-              >
-                {loading ? 'Сохранение...' : 'Сохранить изменения'}
-              </Button>
-            </Box>
-          </Paper>
-          
-          <Paper sx={{ p: 3, mt: 3 }}>
-            <Typography variant="h5" component="h2" gutterBottom>
-              Статистика
-            </Typography>
-            
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ textAlign: 'center', p: 2 }}>
-                  <Typography variant="h4" color="primary">
-                    {user.level}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Уровень
-                  </Typography>
-                </Box>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ textAlign: 'center', p: 2 }}>
-                  <Typography variant="h4" color="secondary">
-                    {user.streak || 0}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Текущая серия
-                  </Typography>
-                </Box>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={4}>
-                <Box sx={{ textAlign: 'center', p: 2 }}>
-                  <Typography variant="h4" color="info.main">
-                    {user.achievements?.length || 0}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Достижения
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </Paper>
+              <Box component="form" onSubmit={handleSubmit} noValidate>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="username"
+                  label={t('auth.username')}
+                  name="username"
+                  autoComplete="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  error={!!errors.username}
+                  helperText={errors.username}
+                  sx={{ mb: 3 }}
+                />
+                
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label={t('auth.email')}
+                  name="email"
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  error={!!errors.email}
+                  helperText={errors.email}
+                  sx={{ mb: 3 }}
+                />
+                
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={loading}
+                  sx={{ mt: 2 }}
+                >
+                  {loading ? t('profile.saving') : t('profile.saveChanges')}
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     </Box>

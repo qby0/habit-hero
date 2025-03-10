@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Paper, Chip, CircularProgress, Alert } from '@mui/material';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const Achievements = () => {
+  const { t } = useTranslation();
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,7 +16,7 @@ const Achievements = () => {
         
         const token = localStorage.getItem('token');
         if (!token) {
-          setError('Необходима авторизация');
+          setError(t('errors.serverError'));
           setLoading(false);
           return;
         }
@@ -30,10 +32,10 @@ const Achievements = () => {
         if (res.data.success) {
           setAchievements(res.data.achievements);
         } else {
-          setError('Не удалось загрузить достижения');
+          setError(t('errors.serverError'));
         }
       } catch (err) {
-        setError('Ошибка при загрузке достижений');
+        setError(t('errors.serverError'));
         console.error(err);
       } finally {
         setLoading(false);
@@ -41,7 +43,7 @@ const Achievements = () => {
     };
     
     fetchAchievements();
-  }, []);
+  }, [t]);
   
   // Получение цвета на основе редкости
   const getRarityColor = (rarity) => {
@@ -61,38 +63,14 @@ const Achievements = () => {
     }
   };
   
-  // Перевод редкости на русский
+  // Перевод редкости
   const getRarityText = (rarity) => {
-    switch (rarity) {
-      case 'common':
-        return 'Обычное';
-      case 'uncommon':
-        return 'Необычное';
-      case 'rare':
-        return 'Редкое';
-      case 'epic':
-        return 'Эпическое';
-      case 'legendary':
-        return 'Легендарное';
-      default:
-        return 'Неизвестно';
-    }
+    return t(`achievements.rarities.${rarity}`);
   };
   
-  // Получение иконки на основе типа
+  // Получение перевода типа
   const getTypeText = (type) => {
-    switch (type) {
-      case 'streak':
-        return 'Серия';
-      case 'completions':
-        return 'Выполнения';
-      case 'level':
-        return 'Уровень';
-      case 'habits':
-        return 'Привычки';
-      default:
-        return 'Другое';
-    }
+    return t(`achievements.types.${type}`);
   };
   
   if (loading) {
@@ -114,16 +92,16 @@ const Achievements = () => {
   return (
     <Box className="fade-in">
       <Typography variant="h4" component="h1" gutterBottom>
-        Достижения
+        {t('achievements.achievements')}
       </Typography>
       
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Разблокируйте достижения, выполняя привычки и повышая уровень.
+        {t('achievements.achievementsSubtitle')}
       </Typography>
       
       {achievements.length === 0 ? (
         <Alert severity="info">
-          Нет доступных достижений. Начните с создания привычек!
+          {t('achievements.noAchievements')}
         </Alert>
       ) : (
         <Grid container spacing={3}>
@@ -210,7 +188,7 @@ const Achievements = () => {
                         color="success.main"
                         sx={{ fontWeight: 700 }}
                       >
-                        ✓ Разблокировано
+                        ✓ {t('achievements.unlocked')}
                       </Typography>
                     </Box>
                   )}
