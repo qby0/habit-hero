@@ -70,7 +70,9 @@
       "easy": "Ľahké",
       "medium": "Stredné",
       "hard": "Ťažké"
-    }
+    },
+    "activeHabitInfo": "Tento návyk je aktívny a zobrazí sa vo vašom prehľade.",
+    "archivedHabitInfo": "Tento návyk je archivovaný a nebude sa zobrazovať vo vašich aktívnych návykoch."
   },
   "profile": {
     "profile": "Profil",

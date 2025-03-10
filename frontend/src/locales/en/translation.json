@@ -70,7 +70,9 @@
       "easy": "Easy",
       "medium": "Medium",
       "hard": "Hard"
-    }
+    },
+    "activeHabitInfo": "This habit is active and will appear in your dashboard.",
+    "archivedHabitInfo": "This habit is archived and will not appear in your active habits."
   },
   "profile": {
     "profile": "Profile",

@@ -19,6 +19,7 @@ import {
   FormControlLabel
 } from '@mui/material';
 import { HabitContext } from '../context/HabitContext';
+import { useTranslation } from 'react-i18next';
 
 const categories = [
   { value: 'health', label: 'Health & Fitness' },
@@ -51,6 +52,7 @@ const weekdays = [
 ];
 
 const HabitEditModal = ({ open, habit, onClose }) => {
+  const { t } = useTranslation();
   const { updateHabit } = useContext(HabitContext);
   
   const [formData, setFormData] = useState({
@@ -164,156 +166,154 @@ const HabitEditModal = ({ open, habit, onClose }) => {
   };
   
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Edit Habit</DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle>
+        {habit ? t('habits.edit') : t('dashboard.addHabit')}
+      </DialogTitle>
       
       <DialogContent>
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mb: 3 }}>
           <TextField
-            fullWidth
-            label="Habit Title"
+            label={t('habits.title')}
             name="title"
             value={formData.title}
             onChange={handleChange}
+            fullWidth
             error={!!errors.title}
             helperText={errors.title}
-            margin="normal"
-            variant="outlined"
           />
-          
+        </Box>
+        
+        <Box sx={{ mb: 3 }}>
           <TextField
-            fullWidth
-            label="Description (Optional)"
+            label={t('habits.description')}
             name="description"
             value={formData.description}
             onChange={handleChange}
-            margin="normal"
-            variant="outlined"
+            fullWidth
             multiline
-            rows={2}
+            rows={3}
           />
-          
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Category</InputLabel>
-                <Select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  label="Category"
-                >
-                  {categories.map((category) => (
-                    <MenuItem key={category.value} value={category.value}>
-                      {category.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Difficulty</InputLabel>
-                <Select
-                  name="difficulty"
-                  value={formData.difficulty}
-                  onChange={handleChange}
-                  label="Difficulty"
-                >
-                  {difficulties.map((difficulty) => (
-                    <MenuItem key={difficulty.value} value={difficulty.value}>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Box
-                          sx={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: '50%',
-                            bgcolor: difficulty.color,
-                            mr: 1
-                          }}
-                        />
-                        {difficulty.label}
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-          
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Frequency</InputLabel>
+        </Box>
+        
+        <Box sx={{ mb: 3 }}>
+          <FormControl fullWidth error={!!errors.category}>
+            <InputLabel id="category-label">{t('habits.category')}</InputLabel>
             <Select
-              name="frequency"
-              value={formData.frequency}
+              labelId="category-label"
+              name="category"
+              value={formData.category}
               onChange={handleChange}
-              label="Frequency"
+              label={t('habits.category')}
             >
-              {frequencies.map((frequency) => (
-                <MenuItem key={frequency.value} value={frequency.value}>
-                  {frequency.label}
+              {categories.map(category => (
+                <MenuItem key={category.value} value={category.value}>
+                  {t(`habits.categories.${category.value}`)}
                 </MenuItem>
               ))}
             </Select>
+            {errors.category && <FormHelperText>{errors.category}</FormHelperText>}
           </FormControl>
-          
-          {formData.frequency === 'custom' && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Select days:
-              </Typography>
-              
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {weekdays.map((day) => (
+        </Box>
+        
+        <Box sx={{ mb: 3 }}>
+          <FormControl fullWidth error={!!errors.difficulty}>
+            <InputLabel id="difficulty-label">{t('habits.difficulty')}</InputLabel>
+            <Select
+              labelId="difficulty-label"
+              name="difficulty"
+              value={formData.difficulty}
+              onChange={handleChange}
+              label={t('habits.difficulty')}
+            >
+              {difficulties.map(difficulty => (
+                <MenuItem key={difficulty.value} value={difficulty.value}>
+                  {t(`habits.difficulties.${difficulty.value}`)} ({difficulty.value === 'easy' ? '5' : difficulty.value === 'medium' ? '10' : '15'} XP)
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.difficulty && <FormHelperText>{errors.difficulty}</FormHelperText>}
+          </FormControl>
+        </Box>
+        
+        <Box sx={{ mb: 3 }}>
+          <FormControl fullWidth error={!!errors.frequency}>
+            <InputLabel id="frequency-label">{t('habits.frequency')}</InputLabel>
+            <Select
+              labelId="frequency-label"
+              name="frequency"
+              value={formData.frequency}
+              onChange={handleChange}
+              label={t('habits.frequency')}
+            >
+              {frequencies.map(frequency => (
+                <MenuItem key={frequency.value} value={frequency.value}>
+                  {t(`habits.${frequency.value}`)}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.frequency && <FormHelperText>{errors.frequency}</FormHelperText>}
+          </FormControl>
+        </Box>
+        
+        {formData.frequency === 'custom' && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              {t('habits.selectDays')}
+            </Typography>
+            <Grid container spacing={1}>
+              {weekdays.map(day => (
+                <Grid item key={day.value}>
                   <Chip
-                    key={day.value}
                     label={day.label}
                     onClick={() => handleCustomDayToggle(day.value)}
                     color={formData.customDays.includes(day.value) ? 'primary' : 'default'}
                     variant={formData.customDays.includes(day.value) ? 'filled' : 'outlined'}
                   />
-                ))}
-              </Box>
-              
-              {errors.customDays && (
-                <FormHelperText error>{errors.customDays}</FormHelperText>
-              )}
-            </Box>
-          )}
-          
-          <Box sx={{ mt: 3 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.active}
-                  onChange={handleSwitchChange}
-                  name="active"
-                  color="primary"
-                />
-              }
-              label="Active"
-            />
-            <Typography variant="body2" color="text.secondary">
-              {formData.active
-                ? 'This habit is active and will appear in your dashboard.'
-                : 'This habit is archived and will not appear in your active habits.'}
-            </Typography>
+                </Grid>
+              ))}
+            </Grid>
+            {errors.customDays && (
+              <FormHelperText error>{errors.customDays}</FormHelperText>
+            )}
           </Box>
+        )}
+        
+        <Box sx={{ mb: 2 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.active}
+                onChange={handleSwitchChange}
+                name="active"
+                color="primary"
+              />
+            }
+            label={t('dashboard.active')}
+          />
+          <Typography variant="body2" color="text.secondary">
+            {formData.active
+              ? t('habits.activeHabitInfo')
+              : t('habits.archivedHabitInfo')}
+          </Typography>
         </Box>
       </DialogContent>
       
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={handleClose} color="inherit">
-          Cancel
+          {t('habits.cancel')}
         </Button>
         <Button 
           onClick={handleSubmit} 
-          variant="contained" 
-          color="primary"
+          variant="contained"
           disabled={loading}
         >
-          {loading ? 'Saving...' : 'Save Changes'}
+          {loading ? t('profile.saving') : (habit ? t('habits.save') : t('dashboard.addHabit'))}
         </Button>
       </DialogActions>
     </Dialog>

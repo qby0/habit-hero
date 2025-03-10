@@ -3,8 +3,183 @@ import { Box, Typography, Grid, Paper, Chip, CircularProgress, Alert } from '@mu
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
+// Словарь переводов для заголовков достижений
+const achievementTitles = {
+  // Streak Achievements
+  'Consistent': {
+    ru: 'Последовательный',
+    uk: 'Послідовний',
+    sk: 'Konzistentný'
+  },
+  'Dedicated': {
+    ru: 'Преданный',
+    uk: 'Відданий',
+    sk: 'Oddaný'
+  },
+  'Committed': {
+    ru: 'Приверженный',
+    uk: 'Прихильний',
+    sk: 'Angažovaný'
+  },
+  'Master of Habit': {
+    ru: 'Мастер привычки',
+    uk: 'Майстер звички',
+    sk: 'Majster návyku'
+  },
+  
+  // Completion Achievements
+  'Beginner': {
+    ru: 'Начинающий',
+    uk: 'Початківець',
+    sk: 'Začiatočník'
+  },
+  'Intermediate': {
+    ru: 'Средний уровень',
+    uk: 'Середній рівень',
+    sk: 'Stredná úroveň'
+  },
+  'Expert': {
+    ru: 'Эксперт',
+    uk: 'Експерт',
+    sk: 'Expert'
+  },
+  'Habit Guru': {
+    ru: 'Гуру привычек',
+    uk: 'Гуру звичок',
+    sk: 'Guru návykov'
+  },
+  
+  // Level Achievements
+  'Level 5': {
+    ru: 'Уровень 5',
+    uk: 'Рівень 5',
+    sk: 'Úroveň 5'
+  },
+  'Level 10': {
+    ru: 'Уровень 10',
+    uk: 'Рівень 10',
+    sk: 'Úroveň 10'
+  },
+  'Level 25': {
+    ru: 'Уровень 25',
+    uk: 'Рівень 25',
+    sk: 'Úroveň 25'
+  },
+  'Level 50': {
+    ru: 'Уровень 50',
+    uk: 'Рівень 50',
+    sk: 'Úroveň 50'
+  },
+  'Level 100': {
+    ru: 'Уровень 100',
+    uk: 'Рівень 100',
+    sk: 'Úroveň 100'
+  },
+  
+  // Habit Creation Achievements
+  'Habit Starter': {
+    ru: 'Создатель привычек',
+    uk: 'Творець звичок',
+    sk: 'Tvorca návykov'
+  },
+  'Habit Collector': {
+    ru: 'Коллекционер привычек',
+    uk: 'Колекціонер звичок',
+    sk: 'Zberateľ návykov'
+  },
+  'Habit Enthusiast': {
+    ru: 'Энтузиаст привычек',
+    uk: 'Ентузіаст звичок',
+    sk: 'Nadšenec návykov'
+  }
+};
+
+// Словарь переводов для описаний достижений
+const achievementDescriptions = {
+  'Maintain a 3-day streak on any habit': {
+    ru: 'Поддерживайте серию из 3 дней по любой привычке',
+    uk: 'Підтримуйте серію з 3 днів по будь-якій звичці',
+    sk: 'Udržujte sériu 3 dní na akomkoľvek návyku'
+  },
+  'Maintain a 7-day streak on any habit': {
+    ru: 'Поддерживайте серию из 7 дней по любой привычке',
+    uk: 'Підтримуйте серію з 7 днів по будь-якій звичці',
+    sk: 'Udržujte sériu 7 dní na akomkoľvek návyku'
+  },
+  'Maintain a 30-day streak on any habit': {
+    ru: 'Поддерживайте серию из 30 дней по любой привычке',
+    uk: 'Підтримуйте серію з 30 днів по будь-якій звичці',
+    sk: 'Udržujte sériu 30 dní na akomkoľvek návyku'
+  },
+  'Maintain a 100-day streak on any habit': {
+    ru: 'Поддерживайте серию из 100 дней по любой привычке',
+    uk: 'Підтримуйте серію зі 100 днів по будь-якій звичці',
+    sk: 'Udržujte sériu 100 dní na akomkoľvek návyku'
+  },
+  'Complete 10 habit tasks': {
+    ru: 'Выполните 10 задач по привычкам',
+    uk: 'Виконайте 10 завдань за звичками',
+    sk: 'Dokončite 10 úloh návykov'
+  },
+  'Complete 50 habit tasks': {
+    ru: 'Выполните 50 задач по привычкам',
+    uk: 'Виконайте 50 завдань за звичками',
+    sk: 'Dokončite 50 úloh návykov'
+  },
+  'Complete 200 habit tasks': {
+    ru: 'Выполните 200 задач по привычкам',
+    uk: 'Виконайте 200 завдань за звичками',
+    sk: 'Dokončite 200 úloh návykov'
+  },
+  'Complete 1000 habit tasks': {
+    ru: 'Выполните 1000 задач по привычкам',
+    uk: 'Виконайте 1000 завдань за звичками',
+    sk: 'Dokončite 1000 úloh návykov'
+  },
+  'Reach level 5': {
+    ru: 'Достигните 5 уровня',
+    uk: 'Досягніть 5 рівня',
+    sk: 'Dosiahnite úroveň 5'
+  },
+  'Reach level 10': {
+    ru: 'Достигните 10 уровня',
+    uk: 'Досягніть 10 рівня',
+    sk: 'Dosiahnite úroveň 10'
+  },
+  'Reach level 25': {
+    ru: 'Достигните 25 уровня',
+    uk: 'Досягніть 25 рівня',
+    sk: 'Dosiahnite úroveň 25'
+  },
+  'Reach level 50': {
+    ru: 'Достигните 50 уровня',
+    uk: 'Досягніть 50 рівня',
+    sk: 'Dosiahnite úroveň 50'
+  },
+  'Reach level 100': {
+    ru: 'Достигните 100 уровня',
+    uk: 'Досягніть 100 рівня',
+    sk: 'Dosiahnite úroveň 100'
+  },
+  'Create 3 habits': {
+    ru: 'Создайте 3 привычки',
+    uk: 'Створіть 3 звички',
+    sk: 'Vytvorte 3 návyky'
+  },
+  'Create 10 habits': {
+    ru: 'Создайте 10 привычек',
+    uk: 'Створіть 10 звичок',
+    sk: 'Vytvorte 10 návykov'
+  },
+  'Create 20 habits': {
+    ru: 'Создайте 20 привычек',
+    uk: 'Створіть 20 звичок',
+    sk: 'Vytvorte 20 návykov'
+  }
+};
+
 const Achievements = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -71,6 +246,24 @@ const Achievements = () => {
   // Получение перевода типа
   const getTypeText = (type) => {
     return t(`achievements.types.${type}`);
+  };
+  
+  // Получение перевода заголовка достижения
+  const getTranslatedTitle = (title) => {
+    const currentLanguage = i18n.language;
+    if (currentLanguage === 'en') return title;
+    
+    const translations = achievementTitles[title];
+    return translations && translations[currentLanguage] ? translations[currentLanguage] : title;
+  };
+  
+  // Получение перевода описания достижения
+  const getTranslatedDescription = (description) => {
+    const currentLanguage = i18n.language;
+    if (currentLanguage === 'en') return description;
+    
+    const translations = achievementDescriptions[description];
+    return translations && translations[currentLanguage] ? translations[currentLanguage] : description;
   };
   
   if (loading) {
@@ -151,11 +344,11 @@ const Achievements = () => {
                       color: achievement.earned ? 'text.primary' : 'text.secondary'
                     }}
                   >
-                    {achievement.title}
+                    {getTranslatedTitle(achievement.title)}
                   </Typography>
                   
                   <Typography variant="body2" sx={{ mb: 2 }}>
-                    {achievement.description}
+                    {getTranslatedDescription(achievement.description)}
                   </Typography>
                   
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -167,7 +360,7 @@ const Achievements = () => {
                     />
                     
                     <Chip 
-                      label={`${achievement.coinsReward} монет`} 
+                      label={`${achievement.coinsReward} ${t('habits.coins')}`} 
                       size="small"
                       color="secondary"
                       variant="outlined"
