@@ -1,8 +1,11 @@
 import React from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import { LocalFireDepartment as FireIcon, EmojiEvents as TrophyIcon } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const UserProgress = ({ user }) => {
+  const { t } = useTranslation();
+  
   if (!user) return null;
   
   const { level, experience, streak, coins } = user;
@@ -15,7 +18,7 @@ const UserProgress = ({ user }) => {
     <Box sx={{ width: '100%', mt: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
         <Typography variant="body2" color="text.secondary">
-          Level {level}
+          {t('profile.level')} {level}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {experience}/{nextLevelXP} XP
@@ -32,7 +35,7 @@ const UserProgress = ({ user }) => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
         <Chip
           icon={<FireIcon sx={{ color: '#ff7043 !important' }} />}
-          label={`${streak} day streak`}
+          label={`${streak} ${t('habits.dayStreak')}`}
           variant="outlined"
           size="small"
           sx={{ 
@@ -44,7 +47,7 @@ const UserProgress = ({ user }) => {
         
         <Chip
           icon={<TrophyIcon sx={{ color: '#ffc107 !important' }} />}
-          label={`${coins} coins`}
+          label={`${coins} ${t('habits.coins')}`}
           variant="outlined"
           size="small"
           sx={{ 

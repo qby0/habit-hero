@@ -9,6 +9,7 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const habitRoutes = require('./routes/habits');
 const userRoutes = require('./routes/users');
+const achievementRoutes = require('./routes/achievements');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,7 @@ app.use(morgan('dev'));
 app.use('/api/auth', authRoutes);
 app.use('/api/habits', habitRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/achievements', achievementRoutes);
 
 // Health check endpoint for Kubernetes
 app.get('/health', (req, res) => {
