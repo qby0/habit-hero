@@ -1,0 +1,194 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b1b1b1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.slide-up {
+  animation: slideUp 0.6s ease-out;
+}
+
+/* Progress bars */
+.progress-container {
+  height: 8px;
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease-in-out;
+}
+
+.progress-xp {
+  background: linear-gradient(90deg, #7c4dff 0%, #c33dff 100%);
+}
+
+.progress-streak {
+  background: linear-gradient(90deg, #ff7043 0%, #ffab40 100%);
+}
+
+/* Badge styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.badge-easy {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.badge-medium {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.badge-hard {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.badge-health {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-productivity {
+  background-color: #e0f7fa;
+  color: #006064;
+}
+
+.badge-relationships {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.badge-learning {
+  background-color: #e8eaf6;
+  color: #283593;
+}
+
+.badge-other {
+  background-color: #f5f5f5;
+  color: #546e7a;
+}
+
+/* Achievement styles */
+.achievement {
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.3s;
+}
+
+.achievement-common {
+  background-color: #e3f2fd;
+  border: 1px solid #bbdefb;
+}
+
+.achievement-uncommon {
+  background-color: #e8f5e9;
+  border: 1px solid #c8e6c9;
+}
+
+.achievement-rare {
+  background-color: #e0f7fa;
+  border: 1px solid #b2ebf2;
+}
+
+.achievement-epic {
+  background-color: #f3e5f5;
+  border: 1px solid #e1bee7;
+}
+
+.achievement-legendary {
+  background-color: #fff8e1;
+  border: 1px solid #ffecb3;
+  box-shadow: 0 0 12px rgba(255, 193, 7, 0.3);
+}
+
+.achievement-earned {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Level up animation */
+@keyframes levelUp {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.level-up {
+  animation: levelUp 0.7s ease-in-out;
+} 
