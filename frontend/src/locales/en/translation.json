@@ -72,7 +72,8 @@
       "hard": "Hard"
     },
     "activeHabitInfo": "This habit is active and will appear in your dashboard.",
-    "archivedHabitInfo": "This habit is archived and will not appear in your active habits."
+    "archivedHabitInfo": "This habit is archived and will not appear in your active habits.",
+    "selectDaysError": "Please select at least one day"
   },
   "profile": {
     "profile": "Profile",

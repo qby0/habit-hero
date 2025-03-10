@@ -72,7 +72,8 @@
       "hard": "Ťažké"
     },
     "activeHabitInfo": "Tento návyk je aktívny a zobrazí sa vo vašom prehľade.",
-    "archivedHabitInfo": "Tento návyk je archivovaný a nebude sa zobrazovať vo vašich aktívnych návykoch."
+    "archivedHabitInfo": "Tento návyk je archivovaný a nebude sa zobrazovať vo vašich aktívnych návykoch.",
+    "selectDaysError": "Prosím, vyberte aspoň jeden deň"
   },
   "profile": {
     "profile": "Profil",

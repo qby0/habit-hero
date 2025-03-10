@@ -17,6 +17,7 @@ import {
   Grid
 } from '@mui/material';
 import { HabitContext } from '../context/HabitContext';
+import { useTranslation } from 'react-i18next';
 
 const categories = [
   { value: 'health', label: 'Health & Fitness' },
@@ -49,6 +50,7 @@ const weekdays = [
 ];
 
 const AddHabitModal = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const { createHabit } = useContext(HabitContext);
   
   const [formData, setFormData] = useState({
@@ -107,11 +109,11 @@ const AddHabitModal = ({ open, onClose }) => {
     const newErrors = {};
     
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = t('errors.required');
     }
     
     if (formData.frequency === 'custom' && formData.customDays.length === 0) {
-      newErrors.customDays = 'Please select at least one day';
+      newErrors.customDays = t('habits.selectDaysError');
     }
     
     setErrors(newErrors);
@@ -147,13 +149,13 @@ const AddHabitModal = ({ open, onClose }) => {
   
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add New Habit</DialogTitle>
+      <DialogTitle>{t('dashboard.addHabit')}</DialogTitle>
       
       <DialogContent>
         <Box sx={{ mt: 2 }}>
           <TextField
             fullWidth
-            label="Habit Title"
+            label={t('habits.title')}
             name="title"
             value={formData.title}
             onChange={handleChange}
@@ -166,7 +168,7 @@ const AddHabitModal = ({ open, onClose }) => {
           
           <TextField
             fullWidth
-            label="Description (Optional)"
+            label={t('habits.description')}
             name="description"
             value={formData.description}
             onChange={handleChange}
@@ -179,16 +181,16 @@ const AddHabitModal = ({ open, onClose }) => {
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth margin="normal">
-                <InputLabel>Category</InputLabel>
+                <InputLabel>{t('habits.category')}</InputLabel>
                 <Select
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  label="Category"
+                  label={t('habits.category')}
                 >
                   {categories.map((category) => (
                     <MenuItem key={category.value} value={category.value}>
-                      {category.label}
+                      {t(`habits.categories.${category.value}`)}
                     </MenuItem>
                   ))}
                 </Select>
@@ -197,12 +199,12 @@ const AddHabitModal = ({ open, onClose }) => {
             
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth margin="normal">
-                <InputLabel>Difficulty</InputLabel>
+                <InputLabel>{t('habits.difficulty')}</InputLabel>
                 <Select
                   name="difficulty"
                   value={formData.difficulty}
                   onChange={handleChange}
-                  label="Difficulty"
+                  label={t('habits.difficulty')}
                 >
                   {difficulties.map((difficulty) => (
                     <MenuItem key={difficulty.value} value={difficulty.value}>
@@ -216,7 +218,7 @@ const AddHabitModal = ({ open, onClose }) => {
                             mr: 1
                           }}
                         />
-                        {difficulty.label}
+                        {t(`habits.difficulties.${difficulty.value}`)} ({difficulty.value === 'easy' ? '5' : difficulty.value === 'medium' ? '10' : '15'} XP)
                       </Box>
                     </MenuItem>
                   ))}
@@ -226,16 +228,16 @@ const AddHabitModal = ({ open, onClose }) => {
           </Grid>
           
           <FormControl fullWidth margin="normal">
-            <InputLabel>Frequency</InputLabel>
+            <InputLabel>{t('habits.frequency')}</InputLabel>
             <Select
               name="frequency"
               value={formData.frequency}
               onChange={handleChange}
-              label="Frequency"
+              label={t('habits.frequency')}
             >
               {frequencies.map((frequency) => (
                 <MenuItem key={frequency.value} value={frequency.value}>
-                  {frequency.label}
+                  {t(`habits.${frequency.value}`)}
                 </MenuItem>
               ))}
             </Select>
@@ -244,7 +246,7 @@ const AddHabitModal = ({ open, onClose }) => {
           {formData.frequency === 'custom' && (
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Select days:
+                {t('habits.selectDays')}:
               </Typography>
               
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -269,15 +271,15 @@ const AddHabitModal = ({ open, onClose }) => {
       
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={handleClose} color="inherit">
-          Cancel
+          {t('habits.cancel')}
         </Button>
         <Button 
           onClick={handleSubmit} 
-          variant="contained" 
+          variant="contained"
           color="primary"
           disabled={loading}
         >
-          {loading ? 'Creating...' : 'Create Habit'}
+          {loading ? t('profile.saving') : t('dashboard.addHabit')}
         </Button>
       </DialogActions>
     </Dialog>

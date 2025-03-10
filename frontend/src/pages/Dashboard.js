@@ -33,6 +33,7 @@ import { AuthContext } from '../context/AuthContext';
 import ConfirmDialog from '../components/ConfirmDialog';
 import HabitEditModal from '../components/HabitEditModal';
 import { useTranslation } from 'react-i18next';
+import AddHabitModal from '../components/AddHabitModal';
 
 // Category icons mapping
 const categoryIcons = {
@@ -54,6 +55,7 @@ const Dashboard = () => {
   const [habitToDelete, setHabitToDelete] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [habitToEdit, setHabitToEdit] = useState(null);
+  const [addHabitOpen, setAddHabitOpen] = useState(false);
   
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -166,7 +168,7 @@ const Dashboard = () => {
               variant="contained"
               color="primary"
               sx={{ mt: 2 }}
-              onClick={() => document.getElementById('add-habit-button')?.click()}
+              onClick={() => setAddHabitOpen(true)}
             >
               {t('dashboard.addFirstHabit')}
             </Button>
@@ -308,6 +310,12 @@ const Dashboard = () => {
         open={editModalOpen}
         habit={habitToEdit}
         onClose={() => setEditModalOpen(false)}
+      />
+      
+      {/* Add Habit Modal */}
+      <AddHabitModal
+        open={addHabitOpen}
+        onClose={() => setAddHabitOpen(false)}
       />
     </Box>
   );
