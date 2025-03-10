@@ -36,4 +36,36 @@ router.delete('/:id', habitController.deleteHabit);
 // @access  Private
 router.post('/:id/complete', habitController.completeHabit);
 
+// @route   PUT api/habits/:id/complete
+// @desc    Complete a habit
+// @access  Private
+router.put('/:id/complete', habitController.completeHabit);
+
+// Workshop Routes
+
+// @route   GET api/habits/workshop
+// @desc    Get all public habits for workshop
+// @access  Private
+router.get('/workshop', habitController.getPublicHabits);
+
+// @route   GET api/habits/workshop/:id
+// @desc    Get a single public habit
+// @access  Private
+router.get('/workshop/:id', habitController.getPublicHabit);
+
+// @route   POST api/habits/:id/rate
+// @desc    Rate a public habit
+// @access  Private
+router.post('/:id/rate', habitController.rateHabit);
+
+// @route   POST api/habits/:id/comment
+// @desc    Comment on a public habit
+// @access  Private
+router.post('/:id/comment', habitController.commentHabit);
+
+// @route   POST api/habits/:id/import
+// @desc    Import a public habit to user's habits
+// @access  Private
+router.post('/:id/import', habitController.importHabit);
+
 module.exports = router; 

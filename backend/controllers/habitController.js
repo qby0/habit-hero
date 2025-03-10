@@ -26,7 +26,7 @@ exports.getHabits = async (req, res) => {
 // Create a new habit
 exports.createHabit = async (req, res) => {
   try {
-    const { title, description, category, frequency, customDays, difficulty } = req.body;
+    const { title, description, category, frequency, customDays, difficulty, isPublic } = req.body;
     
     // Set experience and coins based on difficulty
     let experiencePoints = 10;
@@ -49,7 +49,8 @@ exports.createHabit = async (req, res) => {
       customDays: frequency === 'custom' ? customDays : [],
       difficulty,
       experiencePoints,
-      coinsReward
+      coinsReward,
+      isPublic: isPublic || false
     });
     
     await newHabit.save();
@@ -250,5 +251,199 @@ exports.completeHabit = async (req, res) => {
   } catch (error) {
     console.error('Complete habit error:', error);
     res.status(500).json({ message: 'Server error completing habit' });
+  }
+};
+
+// Get public habits for workshop
+exports.getPublicHabits = async (req, res) => {
+  try {
+    const { sort = 'newest', category, search } = req.query;
+    
+    const query = { isPublic: true };
+    
+    // Apply category filter if provided
+    if (category && category !== 'all') {
+      query.category = category;
+    }
+    
+    // Apply search filter if provided
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    let sortOption = { createdAt: -1 }; // Default sort by newest
+    
+    // Apply sort options
+    if (sort === 'rating') {
+      sortOption = { avgRating: -1 };
+    } else if (sort === 'popularity') {
+      sortOption = { downloads: -1 };
+    }
+    
+    const habits = await Habit.find(query)
+      .select('title description category difficulty avgRating totalRatings downloads createdAt user')
+      .populate('user', 'username')
+      .sort(sortOption);
+    
+    res.json({ success: true, habits });
+  } catch (error) {
+    console.error('Get public habits error:', error);
+    res.status(500).json({ message: 'Server error fetching public habits' });
+  }
+};
+
+// Get a single public habit
+exports.getPublicHabit = async (req, res) => {
+  try {
+    const habit = await Habit.findOne({ _id: req.params.id, isPublic: true })
+      .populate('user', 'username')
+      .populate('comments.user', 'username');
+    
+    if (!habit) {
+      return res.status(404).json({ message: 'Public habit not found' });
+    }
+    
+    res.json({ success: true, habit });
+  } catch (error) {
+    console.error('Get public habit error:', error);
+    res.status(500).json({ message: 'Server error fetching public habit' });
+  }
+};
+
+// Rate a public habit
+exports.rateHabit = async (req, res) => {
+  try {
+    const { rating } = req.body;
+    
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+    }
+    
+    const habit = await Habit.findById(req.params.id);
+    
+    if (!habit) {
+      return res.status(404).json({ message: 'Habit not found' });
+    }
+    
+    if (!habit.isPublic) {
+      return res.status(400).json({ message: 'Cannot rate a private habit' });
+    }
+    
+    // Check if user already rated this habit
+    const existingRatingIndex = habit.ratings.findIndex(
+      r => r.user.toString() === req.user.userId
+    );
+    
+    if (existingRatingIndex !== -1) {
+      // Update existing rating
+      habit.ratings[existingRatingIndex].rating = rating;
+    } else {
+      // Add new rating
+      habit.ratings.push({
+        user: req.user.userId,
+        rating
+      });
+    }
+    
+    // Recalculate average rating
+    const totalRatingPoints = habit.ratings.reduce((sum, r) => sum + r.rating, 0);
+    habit.avgRating = totalRatingPoints / habit.ratings.length;
+    habit.totalRatings = habit.ratings.length;
+    
+    await habit.save();
+    
+    res.json({ 
+      success: true, 
+      avgRating: habit.avgRating, 
+      totalRatings: habit.totalRatings 
+    });
+  } catch (error) {
+    console.error('Rate habit error:', error);
+    res.status(500).json({ message: 'Server error rating habit' });
+  }
+};
+
+// Comment on a public habit
+exports.commentHabit = async (req, res) => {
+  try {
+    const { text } = req.body;
+    
+    if (!text.trim()) {
+      return res.status(400).json({ message: 'Comment text is required' });
+    }
+    
+    const habit = await Habit.findById(req.params.id);
+    
+    if (!habit) {
+      return res.status(404).json({ message: 'Habit not found' });
+    }
+    
+    if (!habit.isPublic) {
+      return res.status(400).json({ message: 'Cannot comment on a private habit' });
+    }
+    
+    // Get user info
+    const user = await User.findById(req.user.userId);
+    
+    // Add comment
+    habit.comments.push({
+      user: req.user.userId,
+      username: user.username,
+      text
+    });
+    
+    await habit.save();
+    
+    res.json({ 
+      success: true, 
+      comment: habit.comments[habit.comments.length - 1]
+    });
+  } catch (error) {
+    console.error('Comment habit error:', error);
+    res.status(500).json({ message: 'Server error commenting on habit' });
+  }
+};
+
+// Import a public habit to user's habits
+exports.importHabit = async (req, res) => {
+  try {
+    const habit = await Habit.findOne({ _id: req.params.id, isPublic: true });
+    
+    if (!habit) {
+      return res.status(404).json({ message: 'Public habit not found' });
+    }
+    
+    // Check if user is trying to import their own habit
+    if (habit.user.toString() === req.user.userId) {
+      return res.status(400).json({ message: 'Cannot import your own habit' });
+    }
+    
+    // Create a new habit for the user based on the public one
+    const newHabit = new Habit({
+      user: req.user.userId,
+      title: habit.title,
+      description: habit.description,
+      category: habit.category,
+      frequency: habit.frequency,
+      customDays: habit.customDays,
+      difficulty: habit.difficulty,
+      experiencePoints: habit.experiencePoints,
+      coinsReward: habit.coinsReward,
+      isPublic: false // New imported habit is private by default
+    });
+    
+    await newHabit.save();
+    
+    // Increment download count on original habit
+    habit.downloads += 1;
+    await habit.save();
+    
+    res.json({ success: true, habit: newHabit });
+  } catch (error) {
+    console.error('Import habit error:', error);
+    res.status(500).json({ message: 'Server error importing habit' });
   }
 }; 

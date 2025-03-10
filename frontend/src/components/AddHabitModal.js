@@ -14,8 +14,12 @@ import {
   Box,
   Chip,
   Typography,
-  Grid
+  Grid,
+  FormControlLabel,
+  Checkbox,
+  Tooltip
 } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import { HabitContext } from '../context/HabitContext';
 import { useTranslation } from 'react-i18next';
 
@@ -59,7 +63,8 @@ const AddHabitModal = ({ open, onClose }) => {
     category: 'other',
     frequency: 'daily',
     customDays: [],
-    difficulty: 'medium'
+    difficulty: 'medium',
+    isPublic: false
   });
   
   const [errors, setErrors] = useState({});
@@ -141,7 +146,8 @@ const AddHabitModal = ({ open, onClose }) => {
       category: 'other',
       frequency: 'daily',
       customDays: [],
-      difficulty: 'medium'
+      difficulty: 'medium',
+      isPublic: false
     });
     setErrors({});
     onClose();
@@ -218,12 +224,30 @@ const AddHabitModal = ({ open, onClose }) => {
                             mr: 1
                           }}
                         />
-                        {t(`habits.difficulties.${difficulty.value}`)} ({difficulty.value === 'easy' ? '5' : difficulty.value === 'medium' ? '10' : '15'} XP)
+                        {t(`habits.difficulties.${difficulty.value}`)}
                       </Box>
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.isPublic}
+                      onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
+                      name="isPublic"
+                    />
+                  }
+                  label={t('workshop.makePublic')}
+                />
+                <Tooltip title={t('workshop.makePublicTooltip')}>
+                  <InfoIcon fontSize="small" sx={{ ml: 1, color: 'text.secondary' }} />
+                </Tooltip>
+              </Box>
             </Grid>
           </Grid>
           

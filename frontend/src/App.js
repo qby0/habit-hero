@@ -13,6 +13,8 @@ import Dashboard from './pages/Dashboard';
 import HabitDetail from './pages/HabitDetail';
 import Profile from './pages/Profile';
 import Achievements from './pages/Achievements';
+import Workshop from './pages/Workshop';
+import WorkshopDetail from './pages/WorkshopDetail';
 import NotFound from './pages/NotFound';
 
 // Components
@@ -55,6 +57,8 @@ const App = () => {
           <Route path="habits/:id" element={<HabitDetail />} />
           <Route path="profile" element={<Profile />} />
           <Route path="achievements" element={<Achievements />} />
+          <Route path="workshop" element={<Workshop />} />
+          <Route path="workshop/:id" element={<WorkshopDetail />} />
         </Route>
         
         <Route path="*" element={<NotFound />} />

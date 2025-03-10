@@ -120,5 +120,41 @@
     "uk": "Ukrajinčina",
     "ru": "Ruština",
     "sk": "Slovenčina"
+  },
+  "workshop": {
+    "title": "Dielňa návykov",
+    "habitDetails": "Detaily návyku",
+    "subtitle": "Objavujte a zdieľajte návyky s komunitou",
+    "search": "Hľadať návyky...",
+    "searchButton": "Hľadať",
+    "category": "Kategória",
+    "allCategories": "Všetky kategórie",
+    "sortBy": "Zoradiť podľa",
+    "newest": "Najnovšie",
+    "highestRated": "Najlepšie hodnotené",
+    "mostDownloaded": "Najpopulárnejšie",
+    "noHabits": "Žiadne návyky neboli nájdené. Skúste iné vyhľadávanie alebo buďte prvý, kto zdieľa návyk!",
+    "by": "autor",
+    "details": "Detaily",
+    "import": "Importovať",
+    "importHabit": "Importovať návyk",
+    "ownHabit": "Toto je váš návyk",
+    "backToWorkshop": "Späť do dielne",
+    "ratings": "hodnotení",
+    "downloads": "stiahnutí",
+    "rateHabit": "Ohodnoťte tento návyk",
+    "ratingHelp": "Vaše hodnotenie pomáha ostatným nájsť kvalitné návyky",
+    "comments": "Komentáre",
+    "addComment": "Pridať komentár...",
+    "noComments": "Zatiaľ žiadne komentáre. Buďte prvý, kto komentuje!",
+    "makePublic": "Zverejniť tento návyk",
+    "makePublicTooltip": "Verejné návyky budú viditeľné pre všetkých používateľov v Dielni návykov",
+    "ratingLabels": {
+      "1": "Slabé",
+      "2": "Priemerné",
+      "3": "Dobré",
+      "4": "Veľmi dobré",
+      "5": "Vynikajúce"
+    }
   }
 } 

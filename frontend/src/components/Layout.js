@@ -26,7 +26,8 @@ import {
   EmojiEvents as AchievementsIcon,
   Person as ProfileIcon,
   Logout as LogoutIcon,
-  Add as AddIcon
+  Add as AddIcon,
+  Store as StoreIcon
 } from '@mui/icons-material';
 import { AuthContext } from '../context/AuthContext';
 import AddHabitModal from './AddHabitModal';
@@ -75,9 +76,14 @@ const Layout = () => {
         return t('achievements.achievements');
       case '/profile':
         return t('profile.profile');
+      case '/workshop':
+        return t('workshop.title');
       default:
         if (location.pathname.startsWith('/habits/')) {
           return t('habits.title');
+        }
+        if (location.pathname.startsWith('/workshop/')) {
+          return t('workshop.habitDetails');
         }
         return t('app.title');
     }
@@ -108,6 +114,13 @@ const Layout = () => {
             <DashboardIcon color={location.pathname === '/' ? 'primary' : 'inherit'} />
           </ListItemIcon>
           <ListItemText primary={t('dashboard.yourHabits')} />
+        </ListItem>
+        
+        <ListItem button onClick={() => handleNavigate('/workshop')} selected={location.pathname.startsWith('/workshop')}>
+          <ListItemIcon>
+            <StoreIcon color={location.pathname.startsWith('/workshop') ? 'primary' : 'inherit'} />
+          </ListItemIcon>
+          <ListItemText primary={t('workshop.title')} />
         </ListItem>
         
         <ListItem button onClick={() => handleNavigate('/achievements')} selected={location.pathname === '/achievements'}>
