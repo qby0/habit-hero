@@ -32,6 +32,7 @@ import { HabitContext } from '../context/HabitContext';
 import { AuthContext } from '../context/AuthContext';
 import ConfirmDialog from '../components/ConfirmDialog';
 import HabitEditModal from '../components/HabitEditModal';
+import { useTranslation } from 'react-i18next';
 
 // Category icons mapping
 const categoryIcons = {
@@ -43,6 +44,7 @@ const categoryIcons = {
 };
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const { habits, loading, error, completeHabit, deleteHabit } = useContext(HabitContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -123,13 +125,13 @@ const Dashboard = () => {
     <Box className="fade-in">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Your Habits
+          {t('dashboard.yourHabits')}
         </Typography>
         
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Chip
             icon={<FireIcon />}
-            label={`${user?.streak || 0} Day Streak`}
+            label={`${user?.streak || 0} ${t('habits.dayStreak')}`}
             color="secondary"
             sx={{ mr: 2 }}
           />
@@ -144,9 +146,9 @@ const Dashboard = () => {
           textColor="primary"
           variant="fullWidth"
         >
-          <Tab label="Active" />
-          <Tab label="Archived" />
-          <Tab label="Completed Today" />
+          <Tab label={t('dashboard.active')} />
+          <Tab label={t('dashboard.archived')} />
+          <Tab label={t('dashboard.completedToday')} />
         </Tabs>
       </Paper>
       
@@ -154,10 +156,10 @@ const Dashboard = () => {
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="h6" color="text.secondary">
             {tabValue === 0
-              ? "You don't have any active habits yet. Add one to get started!"
+              ? t('dashboard.noHabits')
               : tabValue === 1
-              ? "You don't have any archived habits."
-              : "You haven't completed any habits today."}
+              ? t('dashboard.noArchivedHabits')
+              : t('dashboard.noCompletedHabits')}
           </Typography>
           {tabValue === 0 && (
             <Button
@@ -166,7 +168,7 @@ const Dashboard = () => {
               sx={{ mt: 2 }}
               onClick={() => document.getElementById('add-habit-button')?.click()}
             >
-              Add Your First Habit
+              {t('dashboard.addFirstHabit')}
             </Button>
           )}
         </Box>
@@ -178,7 +180,7 @@ const Dashboard = () => {
                 {categoryIcons[category]}
               </Box>
               <Typography variant="h6" component="h2">
-                {category.charAt(0).toUpperCase() + category.slice(1)}
+                {t(`habits.categories.${category}`)}
               </Typography>
             </Box>
             
@@ -223,19 +225,19 @@ const Dashboard = () => {
                       </Typography>
                       
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {habit.description || 'No description'}
+                        {habit.description || t('habits.noDescription')}
                       </Typography>
                       
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                         <Chip
-                          label={habit.difficulty}
+                          label={t(`habits.difficulties.${habit.difficulty}`)}
                           size="small"
                           className={`badge-${habit.difficulty}`}
                         />
                         
                         <Chip
                           icon={<FireIcon fontSize="small" />}
-                          label={`${habit.streak} streak`}
+                          label={`${habit.streak} ${t('habits.streak')}`}
                           size="small"
                           variant="outlined"
                         />
@@ -244,10 +246,10 @@ const Dashboard = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Typography variant="body2" color="text.secondary">
                           {habit.frequency === 'daily'
-                            ? 'Daily'
+                            ? t('habits.daily')
                             : habit.frequency === 'weekly'
-                            ? 'Weekly'
-                            : 'Custom days'}
+                            ? t('habits.weekly')
+                            : t('habits.custom')}
                         </Typography>
                       </Box>
                     </CardContent>
@@ -262,14 +264,14 @@ const Dashboard = () => {
                         onClick={(e) => handleCompleteHabit(e, habit._id)}
                         disabled={habit.isCompletedToday}
                       >
-                        {habit.isCompletedToday ? 'Completed' : 'Complete'}
+                        {habit.isCompletedToday ? t('habits.completed') : t('habits.complete')}
                       </Button>
                       
                       <Box sx={{ ml: 'auto', display: 'flex' }}>
                         <IconButton
                           size="small"
                           onClick={(e) => handleEditClick(e, habit)}
-                          aria-label="edit"
+                          aria-label={t('habits.edit')}
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
@@ -277,7 +279,7 @@ const Dashboard = () => {
                         <IconButton
                           size="small"
                           onClick={(e) => handleDeleteClick(e, habit)}
-                          aria-label="delete"
+                          aria-label={t('habits.delete')}
                           color="error"
                         >
                           <DeleteIcon fontSize="small" />
@@ -295,26 +297,18 @@ const Dashboard = () => {
       {/* Confirm Delete Dialog */}
       <ConfirmDialog
         open={deleteDialogOpen}
-        title="Delete Habit"
-        content={`Are you sure you want to delete "${habitToDelete?.title}"? This action cannot be undone.`}
+        title={t('habits.delete')}
+        content={t('habits.confirmDelete')}
         onConfirm={confirmDelete}
-        onCancel={() => {
-          setDeleteDialogOpen(false);
-          setHabitToDelete(null);
-        }}
+        onCancel={() => setDeleteDialogOpen(false)}
       />
       
       {/* Edit Habit Modal */}
-      {habitToEdit && (
-        <HabitEditModal
-          open={editModalOpen}
-          habit={habitToEdit}
-          onClose={() => {
-            setEditModalOpen(false);
-            setHabitToEdit(null);
-          }}
-        />
-      )}
+      <HabitEditModal
+        open={editModalOpen}
+        habit={habitToEdit}
+        onClose={() => setEditModalOpen(false)}
+      />
     </Box>
   );
 };
