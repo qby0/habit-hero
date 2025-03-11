@@ -16,6 +16,20 @@ router.get('/', habitController.getHabits);
 // @access  Private
 router.post('/', habitController.createHabit);
 
+// Workshop Routes - должны быть перед маршрутами с параметрами для избежания конфликтов
+
+// @route   GET api/habits/workshop
+// @desc    Get all public habits for workshop
+// @access  Private
+router.get('/workshop', habitController.getPublicHabits);
+
+// @route   GET api/habits/workshop/:id
+// @desc    Get a single public habit
+// @access  Private
+router.get('/workshop/:id', habitController.getPublicHabit);
+
+// Маршруты для конкретных привычек
+
 // @route   GET api/habits/:id
 // @desc    Get a single habit
 // @access  Private
@@ -40,18 +54,6 @@ router.post('/:id/complete', habitController.completeHabit);
 // @desc    Complete a habit
 // @access  Private
 router.put('/:id/complete', habitController.completeHabit);
-
-// Workshop Routes
-
-// @route   GET api/habits/workshop
-// @desc    Get all public habits for workshop
-// @access  Private
-router.get('/workshop', habitController.getPublicHabits);
-
-// @route   GET api/habits/workshop/:id
-// @desc    Get a single public habit
-// @access  Private
-router.get('/workshop/:id', habitController.getPublicHabit);
 
 // @route   POST api/habits/:id/rate
 // @desc    Rate a public habit

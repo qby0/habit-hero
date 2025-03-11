@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import { 
   Container, 
   Typography, 
@@ -18,7 +18,10 @@ import {
   Chip,
   Divider,
   Paper,
-  useTheme
+  useTheme,
+  Alert,
+  Snackbar,
+  CircularProgress
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import SortIcon from '@mui/icons-material/Sort';
@@ -39,25 +42,70 @@ const Workshop = () => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [sort, setSort] = useState('newest');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  
+  // Сохраняем предыдущие значения для проверки изменений
+  const prevCategoryRef = useRef(category);
+  const prevSortRef = useRef(sort);
+  
+  // Используем useCallback с мемоизацией зависимостей
+  const fetchHabits = useCallback(async () => {
+    setIsLoadingData(true);
+    await getPublicHabits(sort, category, search);
+    setIsLoadingData(false);
+  }, [getPublicHabits, sort, category, search]);
   
   useEffect(() => {
-    getPublicHabits(sort, category, search);
-  }, [getPublicHabits, sort, category]);
+    // Загружаем привычки только при первой загрузке страницы
+    // или при изменении параметров sort, category или search
+    const categoryChanged = prevCategoryRef.current !== category;
+    const sortChanged = prevSortRef.current !== sort;
+    
+    if (categoryChanged || sortChanged) {
+      fetchHabits();
+      // Обновляем сохраненные значения
+      prevCategoryRef.current = category;
+      prevSortRef.current = sort;
+    }
+  }, [fetchHabits, category, sort]);
+  
+  // При первой загрузке компонента
+  useEffect(() => {
+    fetchHabits();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    getPublicHabits(sort, category, search);
+    fetchHabits();
+  };
+  
+  const handleCategoryChange = (e) => {
+    setCategory(e.target.value);
+  };
+  
+  const handleSortChange = (e) => {
+    setSort(e.target.value);
   };
   
   const handleImport = async (id) => {
     const success = await importHabit(id);
-    if (success) {
+    if (success === true) {
       navigate('/');
+    } else if (success === 'already_imported') {
+      setAlertMessage(t('workshop.alreadyImported'));
+      setShowAlert(true);
     }
   };
   
   const handleViewDetails = (id) => {
     navigate(`/workshop/${id}`);
+  };
+  
+  const handleCloseAlert = () => {
+    setShowAlert(false);
   };
   
   const getCategoryColor = (category) => {
@@ -88,10 +136,21 @@ const Workshop = () => {
     }
   };
   
-  if (loading) return <Loading />;
+  if (loading && !isLoadingData) return <Loading />;
   
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
+      <Snackbar 
+        open={showAlert} 
+        autoHideDuration={6000} 
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseAlert} severity="info" sx={{ width: '100%' }}>
+          {alertMessage}
+        </Alert>
+      </Snackbar>
+      
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           {t('workshop.title')}
@@ -138,7 +197,7 @@ const Workshop = () => {
               </InputLabel>
               <Select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={handleCategoryChange}
                 label={t('workshop.category')}
               >
                 <MenuItem value="all">{t('workshop.allCategories')}</MenuItem>
@@ -161,7 +220,7 @@ const Workshop = () => {
               </InputLabel>
               <Select
                 value={sort}
-                onChange={(e) => setSort(e.target.value)}
+                onChange={handleSortChange}
                 label={t('workshop.sortBy')}
               >
                 <MenuItem value="newest">{t('workshop.newest')}</MenuItem>
@@ -173,7 +232,11 @@ const Workshop = () => {
         </Grid>
       </Paper>
       
-      {publicHabits.length === 0 ? (
+      {isLoadingData ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : publicHabits.length === 0 ? (
         <Box textAlign="center" py={8}>
           <Typography variant="h6" color="text.secondary">
             {t('workshop.noHabits')}
@@ -288,4 +351,4 @@ const Workshop = () => {
   );
 };
 
-export default Workshop; 
+export default Workshop;

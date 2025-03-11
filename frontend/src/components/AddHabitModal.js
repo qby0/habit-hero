@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -17,11 +17,22 @@ import {
   Grid,
   FormControlLabel,
   Checkbox,
-  Tooltip
+  Tooltip,
+  Switch,
+  Divider,
+  IconButton,
+  ToggleButtonGroup,
+  ToggleButton
 } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
+import { 
+  Add as AddIcon,
+  Close as CloseIcon,
+  Info as InfoIcon
+} from '@mui/icons-material';
 import { HabitContext } from '../context/HabitContext';
 import { useTranslation } from 'react-i18next';
+import { useForm, Controller } from 'react-hook-form';
+import { toast } from 'react-toastify';
 
 const categories = [
   { value: 'health', label: 'Health & Fitness' },
@@ -53,257 +64,337 @@ const weekdays = [
   { value: 'sunday', label: 'Sunday' }
 ];
 
-const AddHabitModal = ({ open, onClose }) => {
+const AddHabitModal = ({ open, onClose, habit }) => {
   const { t } = useTranslation();
-  const { createHabit } = useContext(HabitContext);
+  const { createHabit, updateHabit } = useContext(HabitContext);
+  const [customDays, setCustomDays] = useState([]);
+  const [isNegative, setIsNegative] = useState(false);
+  const [triggers, setTriggers] = useState([]);
+  const [triggerInput, setTriggerInput] = useState('');
   
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: 'other',
-    frequency: 'daily',
-    customDays: [],
-    difficulty: 'medium',
-    isPublic: false
-  });
-  
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-    
-    // Clear error when field is changed
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
-      });
-    }
-  };
-  
-  const handleCustomDayToggle = (day) => {
-    const currentDays = [...formData.customDays];
-    const dayIndex = currentDays.indexOf(day);
-    
-    if (dayIndex === -1) {
-      currentDays.push(day);
-    } else {
-      currentDays.splice(dayIndex, 1);
-    }
-    
-    setFormData({
-      ...formData,
-      customDays: currentDays
-    });
-    
-    // Clear error when field is changed
-    if (errors.customDays) {
-      setErrors({
-        ...errors,
-        customDays: ''
-      });
-    }
-  };
-  
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.title.trim()) {
-      newErrors.title = t('errors.required');
-    }
-    
-    if (formData.frequency === 'custom' && formData.customDays.length === 0) {
-      newErrors.customDays = t('habits.selectDaysError');
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-    
-    setLoading(true);
-    
-    const success = await createHabit(formData);
-    
-    if (success) {
-      handleClose();
-    }
-    
-    setLoading(false);
-  };
-  
-  const handleClose = () => {
-    setFormData({
+  const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm({
+    defaultValues: {
       title: '',
       description: '',
-      category: 'other',
-      frequency: 'daily',
-      customDays: [],
+      category: 'health',
       difficulty: 'medium',
-      isPublic: false
-    });
-    setErrors({});
+      frequency: 'daily',
+      isNegative: false,
+      abstainDifficulty: 'medium'
+    }
+  });
+  
+  const frequency = watch('frequency');
+  
+  useEffect(() => {
+    if (habit) {
+      setValue('title', habit.title || '');
+      setValue('description', habit.description || '');
+      setValue('category', habit.category || 'health');
+      setValue('difficulty', habit.difficulty || 'medium');
+      setValue('frequency', habit.frequency || 'daily');
+      setValue('isNegative', habit.isNegative || false);
+      setValue('abstainDifficulty', habit.abstainDifficulty || 'medium');
+      
+      setIsNegative(habit.isNegative || false);
+      setCustomDays(habit.customDays || []);
+      setTriggers(habit.triggers || []);
+    }
+  }, [habit, setValue]);
+  
+  const handleClose = () => {
+    reset();
+    setCustomDays([]);
+    setIsNegative(false);
+    setTriggers([]);
+    setTriggerInput('');
     onClose();
   };
   
+  const onSubmit = async (data) => {
+    const habitData = {
+      ...data,
+      customDays: frequency === 'custom' ? customDays : [],
+      isNegative,
+      triggers: isNegative ? triggers : []
+    };
+    
+    try {
+      if (habit) {
+        const result = await updateHabit(habit._id, habitData);
+        if (result.success) {
+          toast.success(t('habits.habitUpdated'));
+          handleClose();
+        } else {
+          toast.error(result.message);
+        }
+      } else {
+        const result = await createHabit(habitData);
+        if (result.success) {
+          toast.success(t('habits.habitCreated'));
+          handleClose();
+        } else {
+          toast.error(result.message);
+        }
+      }
+    } catch (error) {
+      toast.error(t('errors.serverError'));
+    }
+  };
+  
+  const handleDayToggle = (day) => {
+    if (customDays.includes(day)) {
+      setCustomDays(customDays.filter(d => d !== day));
+    } else {
+      setCustomDays([...customDays, day]);
+    }
+  };
+  
+  const handleHabitTypeChange = (event) => {
+    setIsNegative(event.target.checked);
+    setValue('isNegative', event.target.checked);
+  };
+  
+  const handleAddTrigger = () => {
+    if (triggerInput.trim() && !triggers.includes(triggerInput.trim())) {
+      setTriggers([...triggers, triggerInput.trim()]);
+      setTriggerInput('');
+    }
+  };
+  
+  const handleDeleteTrigger = (trigger) => {
+    setTriggers(triggers.filter(t => t !== trigger));
+  };
+  
+  const handleTriggerKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleAddTrigger();
+    }
+  };
+  
+  const getDayButtonStyle = (day) => ({
+    margin: '0 4px',
+    padding: '4px 8px',
+    minWidth: '36px',
+    backgroundColor: customDays.includes(day) ? 'primary.main' : 'background.paper',
+    color: customDays.includes(day) ? 'white' : 'text.primary',
+    border: '1px solid',
+    borderColor: customDays.includes(day) ? 'primary.main' : 'divider',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: customDays.includes(day) ? 'primary.dark' : 'action.hover',
+    }
+  });
+  
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{t('dashboard.addHabit')}</DialogTitle>
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+      <DialogTitle>
+        {habit ? t('habits.editHabit') : t('habits.addHabit')}
+      </DialogTitle>
       
       <DialogContent>
-        <Box sx={{ mt: 2 }}>
-          <TextField
-            fullWidth
-            label={t('habits.title')}
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            error={!!errors.title}
-            helperText={errors.title}
-            margin="normal"
-            variant="outlined"
-            autoFocus
-          />
-          
-          <TextField
-            fullWidth
-            label={t('habits.description')}
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            margin="normal"
-            variant="outlined"
-            multiline
-            rows={2}
-          />
-          
+        <form id="habit-form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>{t('habits.category')}</InputLabel>
-                <Select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  label={t('habits.category')}
-                >
-                  {categories.map((category) => (
-                    <MenuItem key={category.value} value={category.value}>
-                      {t(`habits.categories.${category.value}`)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>{t('habits.difficulty')}</InputLabel>
-                <Select
-                  name="difficulty"
-                  value={formData.difficulty}
-                  onChange={handleChange}
-                  label={t('habits.difficulty')}
-                >
-                  {difficulties.map((difficulty) => (
-                    <MenuItem key={difficulty.value} value={difficulty.value}>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Box
-                          sx={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: '50%',
-                            bgcolor: difficulty.color,
-                            mr: 1
-                          }}
-                        />
-                        {t(`habits.difficulties.${difficulty.value}`)}
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isNegative}
+                    onChange={handleHabitTypeChange}
+                    color={isNegative ? 'error' : 'primary'}
+                  />
+                }
+                label={
+                  <Typography color={isNegative ? 'error' : 'primary'}>
+                    {isNegative ? t('habits.negativeHabit') : t('habits.positiveHabit')}
+                  </Typography>
+                }
+              />
             </Grid>
             
             <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.isPublic}
-                      onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
-                      name="isPublic"
-                    />
-                  }
-                  label={t('workshop.makePublic')}
-                />
-                <Tooltip title={t('workshop.makePublicTooltip')}>
-                  <InfoIcon fontSize="small" sx={{ ml: 1, color: 'text.secondary' }} />
-                </Tooltip>
-              </Box>
-            </Grid>
-          </Grid>
-          
-          <FormControl fullWidth margin="normal">
-            <InputLabel>{t('habits.frequency')}</InputLabel>
-            <Select
-              name="frequency"
-              value={formData.frequency}
-              onChange={handleChange}
-              label={t('habits.frequency')}
-            >
-              {frequencies.map((frequency) => (
-                <MenuItem key={frequency.value} value={frequency.value}>
-                  {t(`habits.${frequency.value}`)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          
-          {formData.frequency === 'custom' && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                {t('habits.selectDays')}:
-              </Typography>
-              
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {weekdays.map((day) => (
-                  <Chip
-                    key={day.value}
-                    label={day.label}
-                    onClick={() => handleCustomDayToggle(day.value)}
-                    color={formData.customDays.includes(day.value) ? 'primary' : 'default'}
-                    variant={formData.customDays.includes(day.value) ? 'filled' : 'outlined'}
+              <Controller
+                name="title"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label={t('habits.title')}
+                    fullWidth
+                    error={!!errors.title}
+                    helperText={errors.title ? t('errors.requiredField') : ''}
                   />
-                ))}
-              </Box>
-              
-              {errors.customDays && (
-                <FormHelperText error>{errors.customDays}</FormHelperText>
-              )}
-            </Box>
-          )}
-        </Box>
+                )}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label={t('habits.description')}
+                    fullWidth
+                    multiline
+                    rows={3}
+                  />
+                )}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="category"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <FormControl fullWidth error={!!errors.category}>
+                    <InputLabel>{t('habits.category')}</InputLabel>
+                    <Select {...field} label={t('habits.category')}>
+                      <MenuItem value="health">{t('habits.categories.health')}</MenuItem>
+                      <MenuItem value="fitness">{t('habits.categories.fitness')}</MenuItem>
+                      <MenuItem value="productivity">{t('habits.categories.productivity')}</MenuItem>
+                      <MenuItem value="learning">{t('habits.categories.learning')}</MenuItem>
+                      <MenuItem value="finance">{t('habits.categories.finance')}</MenuItem>
+                      <MenuItem value="relationships">{t('habits.categories.relationships')}</MenuItem>
+                      <MenuItem value="mindfulness">{t('habits.categories.mindfulness')}</MenuItem>
+                      <MenuItem value="other">{t('habits.categories.other')}</MenuItem>
+                    </Select>
+                    {errors.category && <FormHelperText>{t('errors.requiredField')}</FormHelperText>}
+                  </FormControl>
+                )}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name={isNegative ? 'abstainDifficulty' : 'difficulty'}
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <FormControl fullWidth error={!!errors.difficulty || !!errors.abstainDifficulty}>
+                    <InputLabel>
+                      {isNegative ? t('habits.abstainDifficulty') : t('habits.difficulty')}
+                    </InputLabel>
+                    <Select 
+                      {...field} 
+                      label={isNegative ? t('habits.abstainDifficulty') : t('habits.difficulty')}
+                    >
+                      <MenuItem value="easy">{t('habits.difficulties.easy')}</MenuItem>
+                      <MenuItem value="medium">{t('habits.difficulties.medium')}</MenuItem>
+                      <MenuItem value="hard">{t('habits.difficulties.hard')}</MenuItem>
+                    </Select>
+                    {(errors.difficulty || errors.abstainDifficulty) && (
+                      <FormHelperText>{t('errors.requiredField')}</FormHelperText>
+                    )}
+                  </FormControl>
+                )}
+              />
+            </Grid>
+            
+            {!isNegative && (
+              <Grid item xs={12}>
+                <Controller
+                  name="frequency"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <FormControl fullWidth error={!!errors.frequency}>
+                      <InputLabel>{t('habits.frequency')}</InputLabel>
+                      <Select {...field} label={t('habits.frequency')}>
+                        <MenuItem value="daily">{t('habits.daily')}</MenuItem>
+                        <MenuItem value="weekly">{t('habits.weekly')}</MenuItem>
+                        <MenuItem value="custom">{t('habits.custom')}</MenuItem>
+                      </Select>
+                      {errors.frequency && <FormHelperText>{t('errors.requiredField')}</FormHelperText>}
+                    </FormControl>
+                  )}
+                />
+              </Grid>
+            )}
+            
+            {!isNegative && frequency === 'custom' && (
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" gutterBottom>
+                  {t('habits.selectDays')}
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                  {weekdays.map((day) => (
+                    <Button
+                      key={day.value}
+                      variant={customDays.includes(day.value) ? 'contained' : 'outlined'}
+                      color="primary"
+                      onClick={() => handleDayToggle(day.value)}
+                      sx={{ minWidth: 100 }}
+                    >
+                      {day.label}
+                    </Button>
+                  ))}
+                </Box>
+                {customDays.length === 0 && (
+                  <FormHelperText error>{t('errors.selectAtLeastOneDay')}</FormHelperText>
+                )}
+              </Grid>
+            )}
+            
+            {isNegative && (
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" gutterBottom>
+                  {t('habits.triggers')}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <TextField
+                    fullWidth
+                    placeholder={t('habits.triggerPlaceholder')}
+                    value={triggerInput}
+                    onChange={(e) => setTriggerInput(e.target.value)}
+                    onKeyPress={handleTriggerKeyPress}
+                    sx={{ mr: 1 }}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleAddTrigger}
+                    disabled={!triggerInput.trim()}
+                    startIcon={<AddIcon />}
+                  >
+                    {t('habits.addTrigger')}
+                  </Button>
+                </Box>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                  {triggers.map((trigger, index) => (
+                    <Chip
+                      key={index}
+                      label={trigger}
+                      onDelete={() => handleDeleteTrigger(trigger)}
+                      color="error"
+                      variant="outlined"
+                    />
+                  ))}
+                </Box>
+              </Grid>
+            )}
+          </Grid>
+        </form>
       </DialogContent>
       
-      <DialogActions sx={{ px: 3, pb: 3 }}>
+      <DialogActions>
         <Button onClick={handleClose} color="inherit">
           {t('habits.cancel')}
         </Button>
         <Button 
-          onClick={handleSubmit} 
+          type="submit" 
+          form="habit-form" 
+          color="primary" 
           variant="contained"
-          color="primary"
-          disabled={loading}
+          disabled={frequency === 'custom' && customDays.length === 0}
         >
-          {loading ? t('profile.saving') : t('dashboard.addHabit')}
+          {habit ? t('habits.save') : t('habits.addHabit')}
         </Button>
       </DialogActions>
     </Dialog>

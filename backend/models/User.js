@@ -20,11 +20,19 @@ const UserSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
+  avatar: {
+    type: String,
+    default: 'default-avatar.png'
+  },
+  bio: {
+    type: String,
+    default: ''
+  },
   level: {
     type: Number,
     default: 1
   },
-  experience: {
+  xp: {
     type: Number,
     default: 0
   },
@@ -32,14 +40,78 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  coins: {
+  longestStreak: {
     type: Number,
     default: 0
   },
-  achievements: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Achievement'
-  }],
+  totalCompletedHabits: {
+    type: Number,
+    default: 0
+  },
+  friends: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ],
+  friendRequests: {
+    sent: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    ],
+    received: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    ]
+  },
+  groups: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Group'
+    }
+  ],
+  groupInvites: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Group'
+    }
+  ],
+  achievements: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Achievement'
+    }
+  ],
+  unlockedAchievements: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Achievement'
+    }
+  ],
+  activeChallenges: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Challenge'
+    }
+  ],
+  completedChallenges: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Challenge'
+    }
+  ],
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
+  lastActive: {
+    type: Date,
+    default: Date.now
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -65,5 +137,8 @@ UserSchema.pre('save', async function(next) {
 UserSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Индекс для быстрого поиска пользователей
+UserSchema.index({ username: 'text', email: 'text' });
 
 module.exports = mongoose.model('User', UserSchema); 

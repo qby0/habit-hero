@@ -14,7 +14,9 @@ import {
   Avatar,
   TextField,
   IconButton,
-  useTheme
+  useTheme,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -41,6 +43,8 @@ const WorkshopDetail = () => {
   const [userRating, setUserRating] = useState(0);
   const [hover, setHover] = useState(-1);
   const [comment, setComment] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
   
   useEffect(() => {
     getPublicHabit(id);
@@ -48,8 +52,11 @@ const WorkshopDetail = () => {
   
   const handleImport = async () => {
     const success = await importHabit(id);
-    if (success) {
+    if (success === true) {
       navigate('/');
+    } else if (success === 'already_imported') {
+      setAlertMessage(t('workshop.alreadyImported'));
+      setShowAlert(true);
     }
   };
   
@@ -70,6 +77,10 @@ const WorkshopDetail = () => {
   
   const handleBack = () => {
     navigate('/workshop');
+  };
+  
+  const handleCloseAlert = () => {
+    setShowAlert(false);
   };
   
   const getDifficultyColor = (difficulty) => {
@@ -323,6 +334,16 @@ const WorkshopDetail = () => {
           </Paper>
         </Grid>
       </Grid>
+      
+      <Snackbar
+        open={showAlert}
+        autoHideDuration={6000}
+        onClose={handleCloseAlert}
+      >
+        <Alert onClose={handleCloseAlert} severity="info">
+          {alertMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

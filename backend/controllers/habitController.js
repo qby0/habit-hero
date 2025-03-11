@@ -1,32 +1,37 @@
 const Habit = require('../models/Habit');
 const User = require('../models/User');
 const Achievement = require('../models/Achievement');
+const mongoose = require('mongoose');
 
 // Get all habits for a user
 exports.getHabits = async (req, res) => {
   try {
-    const habits = await Habit.find({ user: req.user.userId }).sort({ createdAt: -1 });
+    const habits = await Habit.find({ user: req.user.id });
+    res.status(200).json(habits);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get a single habit by ID
+exports.getHabitById = async (req, res) => {
+  try {
+    const habit = await Habit.findOne({ _id: req.params.id, user: req.user.id });
     
-    // Update habit streaks before sending response
-    for (let habit of habits) {
-      const calculatedStreak = habit.calculateStreak();
-      if (calculatedStreak !== habit.streak) {
-        habit.streak = calculatedStreak;
-        await habit.save();
-      }
+    if (!habit) {
+      return res.status(404).json({ message: 'Habit not found' });
     }
     
-    res.json({ success: true, habits });
+    res.status(200).json(habit);
   } catch (error) {
-    console.error('Get habits error:', error);
-    res.status(500).json({ message: 'Server error fetching habits' });
+    res.status(500).json({ error: error.message });
   }
 };
 
 // Create a new habit
 exports.createHabit = async (req, res) => {
   try {
-    const { title, description, category, frequency, customDays, difficulty, isPublic } = req.body;
+    const { title, description, category, frequency, customDays, difficulty, isNegative, triggers, abstainDifficulty } = req.body;
     
     // Set experience and coins based on difficulty
     let experiencePoints = 10;
@@ -41,7 +46,7 @@ exports.createHabit = async (req, res) => {
     }
     
     const newHabit = new Habit({
-      user: req.user.userId,
+      user: req.user.id,
       title,
       description,
       category,
@@ -50,19 +55,21 @@ exports.createHabit = async (req, res) => {
       difficulty,
       experiencePoints,
       coinsReward,
-      isPublic: isPublic || false
+      isNegative: isNegative || false,
+      abstainDifficulty: abstainDifficulty || 5,
+      triggers: triggers || []
     });
     
     await newHabit.save();
     
     // Check for "habit creator" achievement
-    const habitCount = await Habit.countDocuments({ user: req.user.userId });
+    const habitCount = await Habit.countDocuments({ user: req.user.id });
     const achievements = await Achievement.find({ type: 'habits' });
     
     for (let achievement of achievements) {
       if (habitCount >= achievement.threshold) {
         // Check if user already has this achievement
-        const user = await User.findById(req.user.userId);
+        const user = await User.findById(req.user.id);
         if (!user.achievements.includes(achievement._id)) {
           // Add achievement to user
           user.achievements.push(achievement._id);
@@ -80,218 +87,186 @@ exports.createHabit = async (req, res) => {
       }
     }
     
-    res.status(201).json({ success: true, habit: newHabit });
+    res.status(201).json(newHabit);
   } catch (error) {
-    console.error('Create habit error:', error);
-    res.status(500).json({ message: 'Server error creating habit' });
-  }
-};
-
-// Get a single habit by ID
-exports.getHabit = async (req, res) => {
-  try {
-    const habit = await Habit.findOne({ 
-      _id: req.params.id,
-      user: req.user.userId
-    });
-    
-    if (!habit) {
-      return res.status(404).json({ message: 'Habit not found' });
-    }
-    
-    res.json({ success: true, habit });
-  } catch (error) {
-    console.error('Get habit error:', error);
-    res.status(500).json({ message: 'Server error fetching habit' });
+    res.status(500).json({ error: error.message });
   }
 };
 
 // Update a habit
 exports.updateHabit = async (req, res) => {
   try {
-    const { title, description, category, frequency, customDays, difficulty, active } = req.body;
+    const { title, description, category, frequency, customDays, difficulty, archived, isNegative, triggers, abstainDifficulty } = req.body;
     
-    const habit = await Habit.findOne({ 
-      _id: req.params.id,
-      user: req.user.userId
-    });
+    let habit = await Habit.findOne({ _id: req.params.id, user: req.user.id });
     
     if (!habit) {
       return res.status(404).json({ message: 'Habit not found' });
     }
     
-    if (title) habit.title = title;
-    if (description !== undefined) habit.description = description;
-    if (category) habit.category = category;
-    if (frequency) {
-      habit.frequency = frequency;
-      if (frequency === 'custom' && customDays) {
-        habit.customDays = customDays;
-      } else {
-        habit.customDays = [];
-      }
+    habit.title = title || habit.title;
+    habit.description = description !== undefined ? description : habit.description;
+    habit.category = category || habit.category;
+    habit.frequency = frequency || habit.frequency;
+    habit.customDays = customDays || habit.customDays;
+    habit.difficulty = difficulty || habit.difficulty;
+    habit.archived = archived !== undefined ? archived : habit.archived;
+    
+    if (isNegative !== undefined) {
+      habit.isNegative = isNegative;
     }
-    if (difficulty) {
-      habit.difficulty = difficulty;
-      
-      // Update experience and coins based on difficulty
-      if (difficulty === 'easy') {
-        habit.experiencePoints = 5;
-        habit.coinsReward = 3;
-      } else if (difficulty === 'medium') {
-        habit.experiencePoints = 10;
-        habit.coinsReward = 5;
-      } else if (difficulty === 'hard') {
-        habit.experiencePoints = 15;
-        habit.coinsReward = 8;
-      }
+    
+    if (triggers) {
+      habit.triggers = triggers;
     }
-    if (active !== undefined) habit.active = active;
+    
+    if (abstainDifficulty) {
+      habit.abstainDifficulty = abstainDifficulty;
+    }
     
     await habit.save();
     
-    res.json({ success: true, habit });
+    res.status(200).json(habit);
   } catch (error) {
-    console.error('Update habit error:', error);
-    res.status(500).json({ message: 'Server error updating habit' });
+    res.status(500).json({ error: error.message });
   }
 };
 
 // Delete a habit
 exports.deleteHabit = async (req, res) => {
   try {
-    const habit = await Habit.findOneAndDelete({ 
-      _id: req.params.id,
-      user: req.user.userId
-    });
+    const habit = await Habit.findOne({ _id: req.params.id, user: req.user.id });
     
     if (!habit) {
       return res.status(404).json({ message: 'Habit not found' });
     }
     
-    res.json({ success: true, message: 'Habit deleted successfully' });
+    await habit.remove();
+    
+    res.status(200).json({ message: 'Habit deleted successfully' });
   } catch (error) {
-    console.error('Delete habit error:', error);
-    res.status(500).json({ message: 'Server error deleting habit' });
+    res.status(500).json({ error: error.message });
   }
 };
 
 // Complete a habit
 exports.completeHabit = async (req, res) => {
   try {
-    const habit = await Habit.findOne({ 
-      _id: req.params.id,
-      user: req.user.userId
-    });
+    const habit = await Habit.findOne({ _id: req.params.id, user: req.user.id });
     
     if (!habit) {
       return res.status(404).json({ message: 'Habit not found' });
     }
     
-    // Check if already completed today
-    if (habit.isCompletedToday()) {
-      return res.status(400).json({ message: 'Habit already completed today' });
+    if (habit.isNegative) {
+      return res.status(400).json({ message: 'Cannot complete a negative habit', code: 'negativeHabit' });
     }
     
-    // Add completion
-    habit.completions.push({ date: new Date(), completed: true });
+    const result = await habit.markCompleted();
     
-    // Calculate new streak
-    habit.streak = habit.calculateStreak();
-    
-    await habit.save();
-    
-    // Update user experience and coins
-    const user = await User.findById(req.user.userId);
-    user.experience += habit.experiencePoints;
-    user.coins += habit.coinsReward;
-    
-    // Add streak bonus if streak >= 7
-    if (habit.streak >= 7 && habit.streak % 7 === 0) {
-      const streakBonus = 20;
-      user.experience += streakBonus;
-      user.coins += 10;
+    if (!result.success) {
+      return res.status(400).json({ message: result.message });
     }
     
-    // Check for streak achievements
-    const streakAchievements = await Achievement.find({ type: 'streak' });
-    for (let achievement of streakAchievements) {
-      if (habit.streak >= achievement.threshold) {
-        // Check if user already has this achievement
-        if (!user.achievements.includes(achievement._id)) {
-          // Add achievement to user
-          user.achievements.push(achievement._id);
-          user.experience += achievement.experienceReward;
-          user.coins += achievement.coinsReward;
-        }
-      }
-    }
+    const user = await User.findById(req.user.id);
+    const rewardXP = result.baseReward + result.comboBonus;
+    const rewardCoins = Math.round(result.baseReward / 2);
     
-    // Check for level up
-    const levelThreshold = 100 * user.level;
-    let leveledUp = false;
+    user.xp += rewardXP;
+    user.coins += rewardCoins;
     
-    if (user.experience >= levelThreshold) {
+    const oldLevel = user.level;
+    const xpForNextLevel = (user.level * 100) + 50;
+    
+    if (user.xp >= xpForNextLevel) {
       user.level += 1;
-      leveledUp = true;
+      user.xp = user.xp - xpForNextLevel;
     }
     
     await user.save();
     
-    res.json({ 
-      success: true, 
-      habit,
-      user: {
-        experience: user.experience,
-        coins: user.coins,
-        level: user.level
+    const response = {
+      success: true,
+      streak: result.streak,
+      comboCount: result.comboCount,
+      rewards: {
+        xp: rewardXP,
+        coins: rewardCoins
       },
-      leveledUp
-    });
+      levelUp: user.level > oldLevel,
+      newLevel: user.level > oldLevel ? user.level : null
+    };
+    
+    res.status(200).json(response);
   } catch (error) {
-    console.error('Complete habit error:', error);
-    res.status(500).json({ message: 'Server error completing habit' });
+    res.status(500).json({ error: error.message });
   }
 };
 
 // Get public habits for workshop
 exports.getPublicHabits = async (req, res) => {
   try {
-    const { sort = 'newest', category, search } = req.query;
+    const { category, sort, search, page = 1, limit = 10 } = req.query;
     
-    const query = { isPublic: true };
+    const filter = { public: true };
     
-    // Apply category filter if provided
     if (category && category !== 'all') {
-      query.category = category;
+      filter.category = category;
     }
     
-    // Apply search filter if provided
     if (search) {
-      query.$or = [
+      filter.$or = [
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
       ];
     }
     
-    let sortOption = { createdAt: -1 }; // Default sort by newest
-    
-    // Apply sort options
-    if (sort === 'rating') {
-      sortOption = { avgRating: -1 };
-    } else if (sort === 'popularity') {
-      sortOption = { downloads: -1 };
+    let sortField = {};
+    switch(sort) {
+      case 'newest':
+        sortField = { createdAt: -1 };
+        break;
+      case 'highestRated':
+        sortField = { 'averageRating': -1 };
+        break;
+      case 'mostDownloaded':
+        sortField = { downloads: -1 };
+        break;
+      default:
+        sortField = { createdAt: -1 };
     }
     
-    const habits = await Habit.find(query)
-      .select('title description category difficulty avgRating totalRatings downloads createdAt user')
-      .populate('user', 'username')
-      .sort(sortOption);
+    const total = await Habit.countDocuments(filter);
     
-    res.json({ success: true, habits });
+    const skip = (page - 1) * limit;
+    
+    const habits = await Habit.find(filter)
+      .populate('user', 'username')
+      .sort(sortField)
+      .skip(skip)
+      .limit(Number(limit));
+    
+    const habitsWithRating = habits.map(habit => {
+      const totalRating = habit.ratings.reduce((acc, rating) => acc + rating.value, 0);
+      const averageRating = habit.ratings.length > 0 ? totalRating / habit.ratings.length : 0;
+      
+      return {
+        ...habit.toObject(),
+        averageRating,
+        ratingCount: habit.ratings.length
+      };
+    });
+    
+    res.status(200).json({
+      habits: habitsWithRating,
+      pagination: {
+        total,
+        page: Number(page),
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
-    console.error('Get public habits error:', error);
-    res.status(500).json({ message: 'Server error fetching public habits' });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -334,7 +309,7 @@ exports.rateHabit = async (req, res) => {
     
     // Check if user already rated this habit
     const existingRatingIndex = habit.ratings.findIndex(
-      r => r.user.toString() === req.user.userId
+      r => r.user.toString() === req.user.id
     );
     
     if (existingRatingIndex !== -1) {
@@ -343,7 +318,7 @@ exports.rateHabit = async (req, res) => {
     } else {
       // Add new rating
       habit.ratings.push({
-        user: req.user.userId,
+        user: req.user.id,
         rating
       });
     }
@@ -386,11 +361,11 @@ exports.commentHabit = async (req, res) => {
     }
     
     // Get user info
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user.id);
     
     // Add comment
     habit.comments.push({
-      user: req.user.userId,
+      user: req.user.id,
       username: user.username,
       text
     });
@@ -417,13 +392,28 @@ exports.importHabit = async (req, res) => {
     }
     
     // Check if user is trying to import their own habit
-    if (habit.user.toString() === req.user.userId) {
+    if (habit.user.toString() === req.user.id) {
       return res.status(400).json({ message: 'Cannot import your own habit' });
+    }
+    
+    // Check if user has already imported this habit
+    const existingImport = await Habit.findOne({
+      user: req.user.id,
+      title: habit.title,
+      category: habit.category,
+      difficulty: habit.difficulty
+    });
+    
+    if (existingImport) {
+      return res.status(400).json({ 
+        message: 'You have already imported this habit',
+        alreadyImported: true 
+      });
     }
     
     // Create a new habit for the user based on the public one
     const newHabit = new Habit({
-      user: req.user.userId,
+      user: req.user.id,
       title: habit.title,
       description: habit.description,
       category: habit.category,
@@ -446,4 +436,143 @@ exports.importHabit = async (req, res) => {
     console.error('Import habit error:', error);
     res.status(500).json({ message: 'Server error importing habit' });
   }
-}; 
+};
+
+// Mark abstained from a negative habit
+exports.markAbstained = async (req, res) => {
+  try {
+    const habit = await Habit.findOne({ _id: req.params.id, user: req.user.id });
+    
+    if (!habit) {
+      return res.status(404).json({ message: 'Habit not found' });
+    }
+    
+    if (!habit.isNegative) {
+      return res.status(400).json({ message: 'This is not a negative habit', code: 'notNegativeHabit' });
+    }
+    
+    const result = await habit.markAbstained();
+    
+    if (!result.success) {
+      return res.status(400).json({ message: result.message });
+    }
+    
+    const user = await User.findById(req.user.id);
+    const rewardXP = result.baseReward + result.streakBonus;
+    const rewardCoins = Math.round(result.baseReward / 2);
+    
+    user.xp += rewardXP;
+    user.coins += rewardCoins;
+    
+    const oldLevel = user.level;
+    const xpForNextLevel = (user.level * 100) + 50;
+    
+    if (user.xp >= xpForNextLevel) {
+      user.level += 1;
+      user.xp = user.xp - xpForNextLevel;
+    }
+    
+    await user.save();
+    
+    const response = {
+      success: true,
+      abstainDays: result.abstainDays,
+      maxAbstainDays: result.maxAbstainDays,
+      rewards: {
+        xp: rewardXP,
+        coins: rewardCoins
+      },
+      levelUp: user.level > oldLevel,
+      newLevel: user.level > oldLevel ? user.level : null
+    };
+    
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Mark failed from a negative habit
+exports.markFailed = async (req, res) => {
+  try {
+    const habit = await Habit.findOne({ _id: req.params.id, user: req.user.id });
+    
+    if (!habit) {
+      return res.status(404).json({ message: 'Habit not found' });
+    }
+    
+    if (!habit.isNegative) {
+      return res.status(400).json({ message: 'This is not a negative habit', code: 'notNegativeHabit' });
+    }
+    
+    const result = await habit.markFailed();
+    
+    if (!result.success) {
+      return res.status(400).json({ message: result.message });
+    }
+    
+    const response = {
+      success: true,
+      message: 'Habit marked as failed. Don\'t worry, it\'s part of the journey. Tomorrow is a new day!',
+      abstainDays: 0
+    };
+    
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get habit stats for a user
+exports.getHabitStats = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const habits = await Habit.find({ user: userId });
+    
+    const positiveHabits = habits.filter(h => !h.isNegative);
+    const totalPositive = positiveHabits.length;
+    const totalCompleted = positiveHabits.reduce((acc, habit) => 
+      acc + habit.completionHistory.filter(c => c.completed).length, 0);
+    const maxStreak = positiveHabits.reduce((max, habit) => 
+      habit.streak > max ? habit.streak : max, 0);
+    
+    const negativeHabits = habits.filter(h => h.isNegative);
+    const totalNegative = negativeHabits.length;
+    const maxAbstainDays = negativeHabits.reduce((max, habit) => 
+      habit.maxAbstainDays > max ? habit.maxAbstainDays : max, 0);
+    const currentAbstainDays = negativeHabits.reduce((sum, habit) => 
+      sum + habit.abstainDays, 0);
+    
+    const categoryCounts = {};
+    habits.forEach(habit => {
+      if (!categoryCounts[habit.category]) {
+        categoryCounts[habit.category] = 0;
+      }
+      categoryCounts[habit.category] += 1;
+    });
+    
+    const stats = {
+      totalHabits: habits.length,
+      positiveHabits: {
+        total: totalPositive,
+        completed: totalCompleted,
+        maxStreak
+      },
+      negativeHabits: {
+        total: totalNegative,
+        maxAbstainDays,
+        currentAbstainDays
+      },
+      categoryCounts,
+      activeHabits: habits.filter(h => !h.archived).length,
+      archivedHabits: habits.filter(h => h.archived).length
+    };
+    
+    res.status(200).json(stats);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = exports; 

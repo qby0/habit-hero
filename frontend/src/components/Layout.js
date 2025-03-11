@@ -33,6 +33,7 @@ import { AuthContext } from '../context/AuthContext';
 import AddHabitModal from './AddHabitModal';
 import UserProgress from './UserProgress';
 import LanguageSwitcher from './LanguageSwitcher';
+import PageTransition from './PageTransition';
 import { useTranslation } from 'react-i18next';
 
 const Layout = () => {
@@ -238,7 +239,9 @@ const Layout = () => {
       
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
         <Container maxWidth="lg" sx={{ py: 4 }}>
-          <Outlet />
+          <PageTransition>
+            <Outlet />
+          </PageTransition>
         </Container>
       </Box>
       

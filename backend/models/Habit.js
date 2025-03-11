@@ -8,176 +8,137 @@ const HabitSchema = new mongoose.Schema({
   },
   title: {
     type: String,
-    required: true,
-    trim: true
+    required: true
   },
   description: {
     type: String,
-    trim: true
+    default: ''
   },
   category: {
     type: String,
-    enum: ['health', 'productivity', 'relationships', 'learning', 'other'],
-    default: 'other'
+    required: true,
+    enum: ['health', 'productivity', 'social', 'education', 'finance', 'personal', 'other']
   },
   frequency: {
     type: String,
-    enum: ['daily', 'weekly', 'custom'],
-    default: 'daily'
+    required: true,
+    enum: ['daily', 'weekly', 'custom']
   },
   customDays: {
     type: [String],
-    enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-    default: []
+    default: [],
+    validate: {
+      validator: function(days) {
+        if (this.frequency !== 'custom') return true;
+        const validDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        return days.length > 0 && days.every(day => validDays.includes(day));
+      },
+      message: 'Custom days must include at least one valid day of the week'
+    }
   },
   difficulty: {
     type: String,
+    required: true,
+    enum: ['easy', 'medium', 'hard']
+  },
+  isNegative: {
+    type: Boolean,
+    default: false
+  },
+  abstainDifficulty: {
+    type: String,
     enum: ['easy', 'medium', 'hard'],
-    default: 'medium'
+    validate: {
+      validator: function(value) {
+        return !this.isNegative || (this.isNegative && value);
+      },
+      message: 'Abstain difficulty is required for negative habits'
+    }
   },
-  experiencePoints: {
-    type: Number,
-    default: 10
-  },
-  coinsReward: {
-    type: Number,
-    default: 5
+  triggers: {
+    type: [String],
+    default: [],
+    validate: {
+      validator: function(triggers) {
+        return !this.isNegative || (this.isNegative && triggers.length > 0);
+      },
+      message: 'At least one trigger is required for negative habits'
+    }
   },
   streak: {
     type: Number,
     default: 0
   },
-  completions: [{
-    date: {
-      type: Date,
-      default: Date.now
-    },
-    completed: {
-      type: Boolean,
-      default: true
+  longestStreak: {
+    type: Number,
+    default: 0
+  },
+  abstainDays: {
+    type: Number,
+    default: 0
+  },
+  maxAbstainDays: {
+    type: Number,
+    default: 0
+  },
+  completionHistory: [
+    {
+      date: {
+        type: Date,
+        default: Date.now
+      },
+      completed: {
+        type: Boolean,
+        default: false
+      }
     }
-  }],
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  active: {
-    type: Boolean,
-    default: true
-  },
+  ],
   isPublic: {
     type: Boolean,
     default: false
   },
-  ratings: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    rating: {
-      type: Number,
-      min: 1,
-      max: 5,
-      required: true
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  comments: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    username: {
-      type: String,
-      required: true
-    },
-    text: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  avgRating: {
+  likes: {
     type: Number,
     default: 0
   },
-  totalRatings: {
-    type: Number,
-    default: 0
-  },
-  downloads: {
-    type: Number,
-    default: 0
+  likedBy: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ],
+  comments: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      text: {
+        type: String,
+        required: true
+      },
+      username: {
+        type: String
+      },
+      avatar: {
+        type: String
+      },
+      date: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
 });
 
-// Method to check if habit is completed for today
-HabitSchema.methods.isCompletedToday = function() {
-  if (this.completions.length === 0) return false;
-  
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  const lastCompletion = this.completions[this.completions.length - 1];
-  const lastCompletionDate = new Date(lastCompletion.date);
-  lastCompletionDate.setHours(0, 0, 0, 0);
-  
-  return today.getTime() === lastCompletionDate.getTime() && lastCompletion.completed;
-};
+// Индекс для быстрого поиска привычек пользователя
+HabitSchema.index({ user: 1, createdAt: -1 });
 
-// Method to calculate streak
-HabitSchema.methods.calculateStreak = function() {
-  if (this.completions.length === 0) return 0;
-  
-  let streak = 0;
-  const completions = [...this.completions].sort((a, b) => 
-    new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-  
-  // Check last completion
-  const lastCompletion = completions[completions.length - 1];
-  const lastCompletionDate = new Date(lastCompletion.date);
-  lastCompletionDate.setHours(0, 0, 0, 0);
-  
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  
-  // If last completion is not today or yesterday, streak is broken
-  if (lastCompletionDate.getTime() !== today.getTime() && 
-      lastCompletionDate.getTime() !== yesterday.getTime()) {
-    return 0;
-  }
-  
-  // Count the streak
-  const days = {};
-  completions.forEach(completion => {
-    if (completion.completed) {
-      const date = new Date(completion.date);
-      date.setHours(0, 0, 0, 0);
-      days[date.getTime()] = true;
-    }
-  });
-  
-  let currentDate = new Date(lastCompletionDate);
-  
-  while (days[currentDate.getTime()]) {
-    streak++;
-    currentDate.setDate(currentDate.getDate() - 1);
-  }
-  
-  return streak;
-};
+// Индекс для поиска публичных привычек
+HabitSchema.index({ isPublic: 1, likes: -1 });
 
 module.exports = mongoose.model('Habit', HabitSchema); 

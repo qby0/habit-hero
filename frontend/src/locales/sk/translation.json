@@ -58,7 +58,9 @@
     "habitUpdated": "Návyk bol úspešne aktualizovaný!",
     "habitDeleted": "Návyk bol úspešne odstránený!",
     "habitCompleted": "Návyk dokončený! +XP",
+    "alreadyCompletedToday": "Tento návyk ste už dnes dokončili!",
     "confirmDelete": "Naozaj chcete odstrániť tento návyk? Túto akciu nemožno vrátiť späť.",
+    "tip": "Tip",
     "categories": {
       "health": "Zdravie a fitnes",
       "productivity": "Produktivita",
@@ -149,6 +151,7 @@
     "noComments": "Zatiaľ žiadne komentáre. Buďte prvý, kto komentuje!",
     "makePublic": "Zverejniť tento návyk",
     "makePublicTooltip": "Verejné návyky budú viditeľné pre všetkých používateľov v Dielni návykov",
+    "alreadyImported": "Tento návyk ste už importovali",
     "ratingLabels": {
       "1": "Slabé",
       "2": "Priemerné",

@@ -1,9 +1,13 @@
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 import { Box, Typography, Button, Container } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Home as HomeIcon } from '@mui/icons-material';
 
 const NotFound = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  
   return (
     <Container maxWidth="md">
       <Box
@@ -12,32 +16,31 @@ const NotFound = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: '100vh',
+          minHeight: '80vh',
           textAlign: 'center',
-          py: 4
+          py: 5,
         }}
-        className="fade-in"
       >
-        <Typography variant="h1" component="h1" color="primary" sx={{ fontSize: '8rem', fontWeight: 700 }}>
+        <Typography variant="h1" component="h1" sx={{ fontSize: '8rem', fontWeight: 'bold', color: 'primary.main' }}>
           404
         </Typography>
         
-        <Typography variant="h4" component="h2" gutterBottom>
-          Page Not Found
+        <Typography variant="h4" component="h2" sx={{ mb: 2 }}>
+          {t('errors.pageNotFound')}
         </Typography>
         
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 500 }}>
-          The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 600 }}>
+          {t('errors.pageNotFoundDescription')}
         </Typography>
         
         <Button
-          component={RouterLink}
-          to="/"
           variant="contained"
-          startIcon={<HomeIcon />}
+          color="primary"
           size="large"
+          startIcon={<HomeIcon />}
+          onClick={() => navigate('/')}
         >
-          Back to Home
+          {t('errors.backToHome')}
         </Button>
       </Box>
     </Container>
